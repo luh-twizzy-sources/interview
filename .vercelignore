@@ -1,0 +1,8 @@
+AGENTS.md
+java_core/
+*.iml
+.git/
+.agents/
+.codex/
+.vercel/
+node_modules/

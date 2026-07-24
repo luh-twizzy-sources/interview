@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java Interview Prep</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --soft: #eef2f6;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --rose: #be123c;
+      --teal: #0d9488;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, select { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 8px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 13px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .button:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .button-primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .button-primary:hover {
+      border-color: #1d4ed8;
+      background: #1d4ed8;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .summary {
+      min-height: 112px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .summary strong {
+      display: block;
+      color: var(--ink);
+      font-size: 2rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .summary span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: end;
+      margin: 28px 0 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 1.35rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .module-card {
+      display: grid;
+      gap: 14px;
+      min-height: 285px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .module-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .module-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: 1.18rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .module-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 8px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 68%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 94%);
+      color: color-mix(in srgb, var(--accent), black 12%);
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .module-description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .progress-line {
+      display: grid;
+      gap: 7px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .progress-track {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .progress-fill {
+      width: var(--value, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .module-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .module-stat {
+      min-height: 66px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .module-stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.18rem;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .module-stat span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .module-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-self: end;
+    }
+
+    .resources {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .resource-link {
+      min-height: 96px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      transition: border-color 140ms ease, transform 140ms ease;
+    }
+
+    .resource-link:hover {
+      border-color: var(--strong-line);
+      transform: translateY(-1px);
+    }
+
+    .resource-link strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .resource-link span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 900px) {
+      .topbar { grid-template-columns: 1fr; }
+      .top-actions { justify-content: flex-start; }
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .module-grid { grid-template-columns: 1fr; }
+      .resources { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 18px; }
+      h1 { font-size: 1.85rem; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .module-head { grid-template-columns: 1fr; }
+      .module-stats { grid-template-columns: 1fr; }
+      .button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">Java Interview Prep</span>
+        <h1>Единый сайт для подготовки</h1>
+        <p class="lead">Все вопросы из PDF собраны в четыре раздела с поиском, чеклистом, избранным, ответами и тестовым режимом.</p>
+      </div>
+      <div class="top-actions" aria-label="Быстрые действия">
+        <a class="button button-primary" href="java_core_questions.html">Начать с Java Core</a>
+        <a class="button" href="Вопросы_для_собеседования_Java.pdf">Открыть PDF</a>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Сводка">
+      <div class="summary">
+        <strong>516</strong>
+        <span>уникальных вопросов из PDF</span>
+      </div>
+      <div class="summary">
+        <strong>530</strong>
+        <span>карточек в разделах с учетом пересечений</span>
+      </div>
+      <div class="summary">
+        <strong id="totalDone">0</strong>
+        <span>отмечено изученными на этом домене</span>
+      </div>
+      <div class="summary">
+        <strong id="totalFavorites">0</strong>
+        <span>вопросов со звездочкой на этом домене</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="modulesTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="modulesTitle">Разделы</h2>
+          <p>Прогресс читается из тех же ключей localStorage, что и внутри HTML-файлов.</p>
+        </div>
+      </div>
+      <div id="moduleGrid" class="module-grid"></div>
+    </section>
+
+    <section aria-labelledby="resourcesTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="resourcesTitle">Материалы</h2>
+          <p>Дополнительные файлы из этой же рабочей папки.</p>
+        </div>
+      </div>
+      <div class="resources">
+        <a class="resource-link" href="Вопросы_для_собеседования_Java.pdf">
+          <strong>Исходный PDF</strong>
+          <span>Вопросы #1-#516 из основного файла.</span>
+        </a>
+        <a class="resource-link" href="cas_java_mechanism.svg">
+          <strong>CAS в Java</strong>
+          <span>Схема compare-and-swap с retry-циклом.</span>
+        </a>
+        <a class="resource-link" href="java_core_questions.txt">
+          <strong>Java Core TXT</strong>
+          <span>Текстовая версия материала, если нужна быстрая проверка.</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Прогресс хранится в браузере для текущего домена. После деплоя на Vercel у сайта будет отдельное состояние от локально открытых файлов.
+    </footer>
+  </main>
+
+  <script>
+    const modules = [
+      {
+        title: 'Java Core',
+        href: 'java_core_questions.html',
+        accent: '#2563eb',
+        questions: 317,
+        topics: 12,
+        range: '#1-#495',
+        checklistKey: 'java-core-checklist-v1',
+        favoritesKey: 'java-core-favorites-v1',
+        testKey: 'java-core-semantic-choice-test-progress-v1',
+        description: 'String, exceptions, collections, HashMap, OOP, SOLID, patterns, immutability, records, generics, Stream API, JVM, concurrency и CompletableFuture.'
+      },
+      {
+        title: 'Hibernate, JPA и базы данных',
+        href: 'hibernate_jpa_database_questions.html',
+        accent: '#0d9488',
+        questions: 84,
+        topics: 8,
+        range: '#78-#516',
+        checklistKey: 'pdf-hibernate-jpa-db-checklist-v1',
+        favoritesKey: 'pdf-hibernate-jpa-db-favorites-v1',
+        testKey: 'pdf-hibernate-jpa-db-test-progress-v1',
+        description: 'Hibernate, JPA, SQL, PostgreSQL, индексы, транзакции, isolation levels и Spring transaction proxy/self-invocation.'
+      },
+      {
+        title: 'Spring и Spring Boot',
+        href: 'spring_questions.html',
+        accent: '#16a34a',
+        questions: 40,
+        topics: 5,
+        range: '#71-#421',
+        checklistKey: 'pdf-spring-checklist-v1',
+        favoritesKey: 'pdf-spring-favorites-v1',
+        testKey: 'pdf-spring-test-progress-v1',
+        description: 'DI, Spring Core, beans, stereotypes, component scan, profiles, AOP, proxy, @Transactional и автоконфигурация Spring Boot.'
+      },
+      {
+        title: 'Microservices, Kafka, Docker и REST',
+        href: 'microservices_kafka_docker_rest_questions.html',
+        accent: '#be123c',
+        questions: 89,
+        topics: 4,
+        range: '#82-#392',
+        checklistKey: 'pdf-remaining-topics-checklist-v1',
+        favoritesKey: 'pdf-remaining-topics-favorites-v1',
+        testKey: 'pdf-remaining-topics-test-progress-v1',
+        description: 'Microservices, resilience, Kafka, messaging, Docker, Kubernetes, REST, HTTP headers, status codes и API versioning.'
+      }
+    ];
+
+    const moduleGrid = document.querySelector('#moduleGrid');
+    const totalDone = document.querySelector('#totalDone');
+    const totalFavorites = document.querySelector('#totalFavorites');
+
+    function loadArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function loadObject(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '{}');
+        return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function formatPercent(done, total) {
+      if (!total) return '0%';
+      return Math.round((done / total) * 100) + '%';
+    }
+
+    function testStats(key) {
+      const progress = loadObject(key);
+      return Object.values(progress).reduce((acc, item) => {
+        if (!item || typeof item !== 'object') return acc;
+        if (item.status === 'known') acc.known += 1;
+        if (item.status === 'review') acc.review += 1;
+        return acc;
+      }, { known: 0, review: 0 });
+    }
+
+    function renderModules() {
+      let doneSum = 0;
+      let favoriteSum = 0;
+
+      moduleGrid.innerHTML = modules.map((item) => {
+        const done = loadArray(item.checklistKey).length;
+        const favorites = loadArray(item.favoritesKey).length;
+        const tests = testStats(item.testKey);
+        const percent = formatPercent(done, item.questions);
+        doneSum += done;
+        favoriteSum += favorites;
+
+        return `
+          <article class="module-card" style="--accent: ${item.accent}">
+            <div class="module-head">
+              <div>
+                <h3 class="module-title">${item.title}</h3>
+                <div class="module-meta">
+                  <span class="tag">${item.questions} вопросов</span>
+                  <span class="tag">${item.topics} тем</span>
+                  <span class="tag">${item.range}</span>
+                </div>
+              </div>
+              <a class="button" href="${item.href}">Открыть</a>
+            </div>
+            <p class="module-description">${item.description}</p>
+            <div class="progress-line" aria-label="Изучено ${done} из ${item.questions}">
+              <div class="progress-label">
+                <span>Изучено</span>
+                <strong>${done} / ${item.questions}</strong>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="--value: ${percent}"></div></div>
+            </div>
+            <div class="module-stats">
+              <div class="module-stat"><strong>${favorites}</strong><span>со звездочкой</span></div>
+              <div class="module-stat"><strong>${tests.known}</strong><span>верно в тестах</span></div>
+              <div class="module-stat"><strong>${tests.review}</strong><span>на повтор</span></div>
+            </div>
+            <div class="module-actions">
+              <a class="button button-primary" href="${item.href}">Перейти к разделу</a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      totalDone.textContent = String(doneSum);
+      totalFavorites.textContent = String(favoriteSum);
+    }
+
+    renderModules();
+    window.addEventListener('storage', renderModules);
+    window.addEventListener('pageshow', renderModules);
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+AGENTS.md
+java_core/
+*.iml
+.agents/
+.codex/
+.vercel/
+node_modules/
+*.log
+.DS_Store

@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF: Hibernate, JPA и базы данных</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --soft: #eef2f6;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0) 360px),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      padding: 28px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-main {
+      display: grid;
+      gap: 14px;
+      max-width: 820px;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      padding: 5px 10px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #2f3a4a;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 760px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 720px;
+    }
+
+    .stat {
+      min-height: 82px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+      gap: 10px;
+      align-items: center;
+      margin: 18px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .search {
+      min-width: 0;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .search:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.22);
+      border-color: #2563eb;
+    }
+
+    .button {
+      height: 42px;
+      padding: 0 13px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .button:hover { border-color: #94a3b8; background: #f8fafc; }
+
+    .button:disabled,
+    .button:disabled:hover {
+      border-color: var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.64;
+    }
+
+    .topic-test-button {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 58%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 94%);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .topic-test-button:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .topic-test-button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .visible-counter,
+    .check-counter,
+    .favorite-counter {
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .visible-counter { grid-column: 1; }
+
+    .check-counter {
+      grid-column: 2 / span 2;
+      justify-self: start;
+    }
+
+    .favorite-counter {
+      grid-column: 5;
+      justify-self: end;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0 26px;
+    }
+
+    .nav-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 2px 10px;
+      min-height: 78px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--strong-line);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .nav-index {
+      grid-row: span 2;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .nav-title {
+      display: -webkit-box;
+      min-height: 2.4em;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .nav-meta {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topic {
+      scroll-margin-top: 86px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    details { display: block; }
+
+    summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 82px;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    details[open] summary::after { content: "-"; }
+
+    .topic-marker {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-weight: 850;
+    }
+
+    .topic-heading {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .topic-kicker {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .topic-title {
+      overflow-wrap: anywhere;
+      font-size: 1.25rem;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .topic-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 42px;
+      white-space: nowrap;
+    }
+
+    .difficulty,
+    .section-count {
+      padding: 5px 9px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .difficulty {
+      background: color-mix(in srgb, var(--accent), white 88%);
+      color: var(--accent);
+    }
+
+    .section-count {
+      background: var(--soft);
+      color: #334155;
+    }
+
+    .topic-content {
+      border-top: 1px solid var(--line);
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    }
+
+    .topic-summary {
+      margin: 0 0 14px;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .questions {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: question;
+    }
+
+    .question {
+      counter-increment: question;
+      display: grid;
+      grid-template-columns: 34px 62px minmax(0, 1fr) 82px 38px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+
+    .question::before {
+      content: counter(question);
+      display: none;
+    }
+
+    .question.is-done {
+      border-color: color-mix(in srgb, var(--accent), white 68%);
+      background: color-mix(in srgb, var(--accent), white 94%);
+    }
+
+    .question.is-done .question-text {
+      color: #64748b;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: color-mix(in srgb, var(--accent), white 30%);
+    }
+
+    .question.is-favorite {
+      box-shadow: inset -4px 0 0 #f59e0b;
+    }
+
+    .check-wrap {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+    }
+
+    .question-check {
+      appearance: none;
+      position: relative;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      border: 2px solid var(--strong-line);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .question-check:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 88%);
+    }
+
+    .question-check:checked {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .question-check:checked::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 11px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .question-check:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 3px 7px;
+      border-radius: 8px;
+      background: var(--soft);
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .question-text {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      align-self: center;
+    }
+
+    .answer-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      justify-self: end;
+      width: 76px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 58%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 94%);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .answer-toggle:hover,
+    .answer-toggle[aria-expanded="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .answer-toggle:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .answer-panel {
+      grid-column: 3 / -1;
+      display: block;
+      padding: 12px 14px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 74%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 96%);
+      color: #334155;
+      font-size: 0.94rem;
+      line-height: 1.52;
+      overflow-wrap: anywhere;
+    }
+
+
+    .favorite-toggle {
+      display: grid;
+      place-items: center;
+      justify-self: end;
+      width: 32px;
+      height: 32px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      font: inherit;
+      font-size: 1.35rem;
+      line-height: 1;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .favorite-toggle::before {
+      content: "☆";
+    }
+
+    .favorite-toggle:hover {
+      border-color: #facc15;
+      background: #fef9c3;
+      color: #ca8a04;
+    }
+
+    .favorite-toggle:focus-visible {
+      outline: 3px solid rgba(245, 158, 11, 0.26);
+      outline-offset: 2px;
+    }
+
+    .question.is-favorite .favorite-toggle {
+      color: #f59e0b;
+    }
+
+    .question.is-favorite .favorite-toggle::before {
+      content: "★";
+    }
+
+    .empty-state {
+      display: none;
+      padding: 20px;
+      border: 1px dashed var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state.is-visible { display: block; }
+
+    .favorite-test-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-top: 28px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-left: 5px solid #f59e0b;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .favorite-test-kicker {
+      display: block;
+      color: #b45309;
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .favorite-test-panel h2 {
+      margin: 4px 0 0;
+      color: var(--ink);
+      font-size: 1.15rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .favorite-test-button {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .favorite-test-button:hover:not(:disabled) {
+      border-color: #d97706;
+      background: #f59e0b;
+      color: #fff;
+    }
+
+    footer {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 920px) {
+      .stats { grid-template-columns: 1fr; }
+      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .search, .visible-counter, .check-counter, .favorite-counter { grid-column: 1 / -1; }
+      .visible-counter { order: 4; }
+      .check-counter { order: 5; justify-self: start; }
+      .favorite-counter { order: 6; justify-self: start; }
+      summary { grid-template-columns: auto minmax(0, 1fr); }
+      summary::after { grid-column: 1 / -1; width: 100%; }
+      .topic-side { grid-column: 1 / -1; margin-right: 0; flex-wrap: wrap; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 20px, 1120px); padding-top: 18px; }
+      h1 { font-size: 1.75rem; }
+      .toolbar { position: static; grid-template-columns: 1fr; }
+      .nav-grid { grid-template-columns: 1fr; }
+      .button { width: 100%; }
+      .question { grid-template-columns: 34px minmax(0, 1fr) 76px 38px; gap: 7px 10px; align-items: start; }
+      .check-wrap { grid-row: 1 / span 3; }
+      .question-number { grid-column: 2; width: fit-content; }
+      .question-text { grid-column: 2 / -1; grid-row: 2; }
+      .answer-toggle { grid-column: 3; grid-row: 1; width: 70px; }
+      .answer-panel { grid-column: 2 / -1; }
+      .favorite-toggle { grid-column: 4; grid-row: 1; align-self: center; }
+      .favorite-test-panel { grid-template-columns: 1fr; }
+      .favorite-test-button { width: 100%; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 12px; }
+      .page { width: 100%; padding: 0; }
+      .toolbar, .nav-grid, .answer-toggle, .topic-test-button, .favorite-test-panel { display: none; }
+      .hero { padding-top: 0; }
+      .topic { box-shadow: none; break-inside: avoid; }
+      details { display: block; }
+      details:not([open]) .topic-content { display: block; }
+      summary::after { display: none; }
+      .question { break-inside: avoid; }
+    }
+</style>
+</head>
+<body data-total-questions="84">
+  <main class="page">
+    <header class="hero">
+      <div class="hero-main">
+        <span class="eyebrow">PDF Interview Questions</span>
+        <h1>Hibernate, JPA и базы данных: вопросы из PDF</h1>
+        <p class="lead">Вопросы взяты из файла Вопросы_для_собеседования_Java.pdf. Сохранены исходные номера, а темы сгруппированы вокруг SQL, транзакций, Hibernate/JPA и связанных database-паттернов.</p>
+      </div>
+      <div class="stats" aria-label="Сводка">
+        <div class="stat"><strong>84</strong><span>вопроса из PDF</span></div>
+        <div class="stat"><strong>5</strong><span>тем</span></div>
+        <div class="stat"><strong>#78-516</strong><span>исходные номера</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar" aria-label="Управление списком">
+      <input id="search" class="search" type="search" placeholder="Поиск по вопросам" autocomplete="off">
+      <button id="expandAll" class="button" type="button">Раскрыть все</button>
+      <button id="collapseAll" class="button" type="button">Свернуть все</button>
+      <button id="resetChecks" class="button" type="button">Сбросить чеклист</button>
+      <button id="openTests" class="button" type="button">Открыть тесты</button>
+      <span class="visible-counter">Показано: <strong id="visibleCount">84 из 84</strong></span>
+      <span class="check-counter">Отмечено: <strong id="checkedCount">0 из 84</strong></span>
+      <span class="favorite-counter">Понравилось: <strong id="favoriteCount">0 из 84</strong></span>
+    </div>
+
+    <nav class="nav-grid" aria-label="Темы Hibernate, JPA и баз данных из PDF">
+      
+        <a class="nav-card" href="#topic-01" style="--accent: #2563eb;">
+          <span class="nav-index">01</span>
+          <span class="nav-title">Базы данных / SQL / PostgreSQL</span>
+          <span class="nav-meta">1. Базовый · 21 вопрос</span>
+        </a>
+        <a class="nav-card" href="#topic-02" style="--accent: #dc2626;">
+          <span class="nav-index">02</span>
+          <span class="nav-title">Транзакции</span>
+          <span class="nav-meta">2. Базовый+ · 22 вопроса</span>
+        </a>
+        <a class="nav-card" href="#topic-03" style="--accent: #16a34a;">
+          <span class="nav-index">03</span>
+          <span class="nav-title">Hibernate / JPA</span>
+          <span class="nav-meta">3. Средний · 30 вопросов</span>
+        </a>
+        <a class="nav-card" href="#topic-04" style="--accent: #f97316;">
+          <span class="nav-index">04</span>
+          <span class="nav-title">Микросервисы: БД и распределённые транзакции</span>
+          <span class="nav-meta">4. Средний+ · 8 вопросов</span>
+        </a>
+        <a class="nav-card" href="#topic-05" style="--accent: #7c3aed;">
+          <span class="nav-index">05</span>
+          <span class="nav-title">Spring: @Transactional и proxy</span>
+          <span class="nav-meta">5. Продвинутый · 3 вопроса</span>
+        </a>
+    </nav>
+
+    <div id="emptyState" class="empty-state">По этому запросу вопросов не найдено.</div>
+
+    <div class="topic-list">
+      
+      <section class="topic" id="topic-01" data-total="21" style="--accent: #2563eb;">
+        <details open>
+          <summary>
+            <span class="topic-marker">01</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 1</span>
+              <span class="topic-title">Базы данных / SQL / PostgreSQL</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">1. Базовый</span>
+              <span class="section-count">21 вопрос</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #496-516 из PDF: индексы, JOIN, GROUP BY, оконные функции, MVCC, VACUUM, ANALYZE и explain plan.</p>
+            <ol class="questions">
+              <li class="question" data-text="Для чего нужны индексы?">
+              <span class="question-number">#496</span>
+              <span class="question-text">Для чего нужны индексы?</span>
+            </li><li class="question" data-text="Как работает B-tree индекс?">
+              <span class="question-number">#497</span>
+              <span class="question-text">Как работает B-tree индекс?</span>
+            </li><li class="question" data-text="Что такое составной индекс?">
+              <span class="question-number">#498</span>
+              <span class="question-text">Что такое составной индекс?</span>
+            </li><li class="question" data-text="Когда стоит создавать индекс?">
+              <span class="question-number">#499</span>
+              <span class="question-text">Когда стоит создавать индекс?</span>
+            </li><li class="question" data-text="Какие недостатки индексов?">
+              <span class="question-number">#500</span>
+              <span class="question-text">Какие недостатки индексов?</span>
+            </li><li class="question" data-text="Что такое кардинальность индекса?">
+              <span class="question-number">#501</span>
+              <span class="question-text">Что такое кардинальность индекса?</span>
+            </li><li class="question" data-text="Какие типы JOIN существуют?">
+              <span class="question-number">#502</span>
+              <span class="question-text">Какие типы JOIN существуют?</span>
+            </li><li class="question" data-text="В чём разница между INNER JOIN и LEFT JOIN?">
+              <span class="question-number">#503</span>
+              <span class="question-text">В чём разница между INNER JOIN и LEFT JOIN?</span>
+            </li><li class="question" data-text="Что лучше: JOIN или подзапрос?">
+              <span class="question-number">#504</span>
+              <span class="question-text">Что лучше: JOIN или подзапрос?</span>
+            </li><li class="question" data-text="Что такое коррелированный подзапрос?">
+              <span class="question-number">#505</span>
+              <span class="question-text">Что такое коррелированный подзапрос?</span>
+            </li><li class="question" data-text="В чём разница между WHERE и HAVING?">
+              <span class="question-number">#506</span>
+              <span class="question-text">В чём разница между WHERE и HAVING?</span>
+            </li><li class="question" data-text="Что делает GROUP BY?">
+              <span class="question-number">#507</span>
+              <span class="question-text">Что делает GROUP BY?</span>
+            </li><li class="question" data-text="Когда использовать HAVING?">
+              <span class="question-number">#508</span>
+              <span class="question-text">Когда использовать HAVING?</span>
+            </li><li class="question" data-text="Что такое оконные функции (Window Functions)?">
+              <span class="question-number">#509</span>
+              <span class="question-text">Что такое оконные функции (Window Functions)?</span>
+            </li><li class="question" data-text="Что делает ROW_NUMBER()?">
+              <span class="question-number">#510</span>
+              <span class="question-text">Что делает ROW_NUMBER()?</span>
+            </li><li class="question" data-text="Что делает RANK() и DENSE_RANK()?">
+              <span class="question-number">#511</span>
+              <span class="question-text">Что делает RANK() и DENSE_RANK()?</span>
+            </li><li class="question" data-text="Как работает MVCC в PostgreSQL?">
+              <span class="question-number">#512</span>
+              <span class="question-text">Как работает MVCC в PostgreSQL?</span>
+            </li><li class="question" data-text="Что такое VACUUM в PostgreSQL?">
+              <span class="question-number">#513</span>
+              <span class="question-text">Что такое VACUUM в PostgreSQL?</span>
+            </li><li class="question" data-text="Зачем нужен ANALYZE?">
+              <span class="question-number">#514</span>
+              <span class="question-text">Зачем нужен ANALYZE?</span>
+            </li><li class="question" data-text="Что такое explain plan?">
+              <span class="question-number">#515</span>
+              <span class="question-text">Что такое explain plan?</span>
+            </li><li class="question" data-text="Как оптимизировать медленные запросы?">
+              <span class="question-number">#516</span>
+              <span class="question-text">Как оптимизировать медленные запросы?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-02" data-total="22" style="--accent: #dc2626;">
+        <details open>
+          <summary>
+            <span class="topic-marker">02</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 11</span>
+              <span class="topic-title">Транзакции</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">2. Базовый+</span>
+              <span class="section-count">22 вопроса</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #240-261 из PDF: ACID, уровни изоляции, аномалии чтения, Spring propagation, rollback и @Transactional.</p>
+            <ol class="questions">
+              <li class="question" data-text="Расшифруйте каждую букву ACID">
+              <span class="question-number">#240</span>
+              <span class="question-text">Расшифруйте каждую букву ACID</span>
+            </li><li class="question" data-text="Какие уровни изоляции транзакций существуют?">
+              <span class="question-number">#241</span>
+              <span class="question-text">Какие уровни изоляции транзакций существуют?</span>
+            </li><li class="question" data-text="Что такое Read Uncommitted?">
+              <span class="question-number">#242</span>
+              <span class="question-text">Что такое Read Uncommitted?</span>
+            </li><li class="question" data-text="Что такое Read Committed?">
+              <span class="question-number">#243</span>
+              <span class="question-text">Что такое Read Committed?</span>
+            </li><li class="question" data-text="Что такое Repeatable Read?">
+              <span class="question-number">#244</span>
+              <span class="question-text">Что такое Repeatable Read?</span>
+            </li><li class="question" data-text="Что такое Serializable?">
+              <span class="question-number">#245</span>
+              <span class="question-text">Что такое Serializable?</span>
+            </li><li class="question" data-text="Что такое грязное чтение (Dirty Read)?">
+              <span class="question-number">#246</span>
+              <span class="question-text">Что такое грязное чтение (Dirty Read)?</span>
+            </li><li class="question" data-text="Что такое неповторяющееся чтение (Non-Repeatable Read)?">
+              <span class="question-number">#247</span>
+              <span class="question-text">Что такое неповторяющееся чтение (Non-Repeatable Read)?</span>
+            </li><li class="question" data-text="Что такое фантомное чтение (Phantom Read)?">
+              <span class="question-number">#248</span>
+              <span class="question-text">Что такое фантомное чтение (Phantom Read)?</span>
+            </li><li class="question" data-text="Что такое потерянное обновление (Lost Update)?">
+              <span class="question-number">#249</span>
+              <span class="question-text">Что такое потерянное обновление (Lost Update)?</span>
+            </li><li class="question" data-text="Какой уровень изоляции по умолчанию в PostgreSQL?">
+              <span class="question-number">#250</span>
+              <span class="question-text">Какой уровень изоляции по умолчанию в PostgreSQL?</span>
+            </li><li class="question" data-text="Какой уровень изоляции по умолчанию в MySQL?">
+              <span class="question-number">#251</span>
+              <span class="question-text">Какой уровень изоляции по умолчанию в MySQL?</span>
+            </li><li class="question" data-text="Что такое Propagation в Spring?">
+              <span class="question-number">#252</span>
+              <span class="question-text">Что такое Propagation в Spring?</span>
+            </li><li class="question" data-text="Что делает Propagation.NESTED?">
+              <span class="question-number">#253</span>
+              <span class="question-text">Что делает Propagation.NESTED?</span>
+            </li><li class="question" data-text="В чём разница между REQUIRED и REQUIRES_NEW?">
+              <span class="question-number">#254</span>
+              <span class="question-text">В чём разница между REQUIRED и REQUIRES_NEW?</span>
+            </li><li class="question" data-text="Что такое аннотация @Transactional?">
+              <span class="question-number">#255</span>
+              <span class="question-text">Что такое аннотация @Transactional?</span>
+            </li><li class="question" data-text="На каком уровне можно использовать @Transactional?">
+              <span class="question-number">#256</span>
+              <span class="question-text">На каком уровне можно использовать @Transactional?</span>
+            </li><li class="question" data-text="Что такое rollback в транзакциях?">
+              <span class="question-number">#257</span>
+              <span class="question-text">Что такое rollback в транзакциях?</span>
+            </li><li class="question" data-text="Какие исключения по умолчанию вызывают rollback?">
+              <span class="question-number">#258</span>
+              <span class="question-text">Какие исключения по умолчанию вызывают rollback?</span>
+            </li><li class="question" data-text="Как настроить rollback для checked exceptions?">
+              <span class="question-number">#259</span>
+              <span class="question-text">Как настроить rollback для checked exceptions?</span>
+            </li><li class="question" data-text="Что такое readonly транзакция?">
+              <span class="question-number">#260</span>
+              <span class="question-text">Что такое readonly транзакция?</span>
+            </li><li class="question" data-text="Что произойдёт при вызове @Transactional метода из другого метода того же класса?">
+              <span class="question-number">#261</span>
+              <span class="question-text">Что произойдёт при вызове @Transactional метода из другого метода того же класса?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-03" data-total="30" style="--accent: #16a34a;">
+        <details open>
+          <summary>
+            <span class="topic-marker">03</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 16</span>
+              <span class="topic-title">Hibernate / JPA</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">3. Средний</span>
+              <span class="section-count">30 вопросов</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #104-133 из PDF: N+1, fetch, lifecycle, кеши, flush, EntityManager, locking, cascade, связи, JPQL и наследование.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое проблема N+1 и как её решить?">
+              <span class="question-number">#104</span>
+              <span class="question-text">Что такое проблема N+1 и как её решить?</span>
+            </li><li class="question" data-text="В чём разница между Lazy и Eager загрузкой?">
+              <span class="question-number">#105</span>
+              <span class="question-text">В чём разница между Lazy и Eager загрузкой?</span>
+            </li><li class="question" data-text="Когда использовать Lazy, а когда Eager loading?">
+              <span class="question-number">#106</span>
+              <span class="question-text">Когда использовать Lazy, а когда Eager loading?</span>
+            </li><li class="question" data-text="Что такое LazyInitializationException и как её избежать?">
+              <span class="question-number">#107</span>
+              <span class="question-text">Что такое LazyInitializationException и как её избежать?</span>
+            </li><li class="question" data-text="Какие стратегии fetch существуют в Hibernate?">
+              <span class="question-number">#108</span>
+              <span class="question-text">Какие стратегии fetch существуют в Hibernate?</span>
+            </li><li class="question" data-text="Что делает аннотация @BatchSize?">
+              <span class="question-number">#109</span>
+              <span class="question-text">Что делает аннотация @BatchSize?</span>
+            </li><li class="question" data-text="Опишите жизненный цикл Entity в Hibernate">
+              <span class="question-number">#110</span>
+              <span class="question-text">Опишите жизненный цикл Entity в Hibernate</span>
+            </li><li class="question" data-text="Что такое состояния: transient, persistent, detached, removed?">
+              <span class="question-number">#111</span>
+              <span class="question-text">Что такое состояния: transient, persistent, detached, removed?</span>
+            </li><li class="question" data-text="Что такое кэш первого уровня в Hibernate?">
+              <span class="question-number">#112</span>
+              <span class="question-text">Что такое кэш первого уровня в Hibernate?</span>
+            </li><li class="question" data-text="Что такое кэш второго уровня и когда его использовать?">
+              <span class="question-number">#113</span>
+              <span class="question-text">Что такое кэш второго уровня и когда его использовать?</span>
+            </li><li class="question" data-text="Как настроить кэш второго уровня?">
+              <span class="question-number">#114</span>
+              <span class="question-text">Как настроить кэш второго уровня?</span>
+            </li><li class="question" data-text="Что такое dirty checking в Hibernate?">
+              <span class="question-number">#115</span>
+              <span class="question-text">Что такое dirty checking в Hibernate?</span>
+            </li><li class="question" data-text="Как работает механизм flush в Hibernate?">
+              <span class="question-number">#116</span>
+              <span class="question-text">Как работает механизм flush в Hibernate?</span>
+            </li><li class="question" data-text="В чём разница между persist() и merge()?">
+              <span class="question-number">#117</span>
+              <span class="question-text">В чём разница между persist() и merge()?</span>
+            </li><li class="question" data-text="Что делает метод refresh()?">
+              <span class="question-number">#118</span>
+              <span class="question-text">Что делает метод refresh()?</span>
+            </li><li class="question" data-text="Что такое EntityManager и чем он отличается от Session?">
+              <span class="question-number">#119</span>
+              <span class="question-text">Что такое EntityManager и чем он отличается от Session?</span>
+            </li><li class="question" data-text="Как реализовать оптимистичную блокировку в JPA?">
+              <span class="question-number">#120</span>
+              <span class="question-text">Как реализовать оптимистичную блокировку в JPA?</span>
+            </li><li class="question" data-text="Как реализовать пессимистичную блокировку в JPA?">
+              <span class="question-number">#121</span>
+              <span class="question-text">Как реализовать пессимистичную блокировку в JPA?</span>
+            </li><li class="question" data-text="Что такое @Version и зачем она нужна?">
+              <span class="question-number">#122</span>
+              <span class="question-text">Что такое @Version и зачем она нужна?</span>
+            </li><li class="question" data-text="Как работают каскадные операции (Cascade)?">
+              <span class="question-number">#123</span>
+              <span class="question-text">Как работают каскадные операции (Cascade)?</span>
+            </li><li class="question" data-text="Какие типы Cascade существуют?">
+              <span class="question-number">#124</span>
+              <span class="question-text">Какие типы Cascade существуют?</span>
+            </li><li class="question" data-text="Что такое orphan removal?">
+              <span class="question-number">#125</span>
+              <span class="question-text">Что такое orphan removal?</span>
+            </li><li class="question" data-text="Как правильно использовать @OneToMany и @ManyToOne?">
+              <span class="question-number">#126</span>
+              <span class="question-text">Как правильно использовать @OneToMany и @ManyToOne?</span>
+            </li><li class="question" data-text="В чём особенности bidirectional relationships?">
+              <span class="question-number">#127</span>
+              <span class="question-text">В чём особенности bidirectional relationships?</span>
+            </li><li class="question" data-text="Как избежать бесконечной рекурсии при сериализации Entity?">
+              <span class="question-number">#128</span>
+              <span class="question-text">Как избежать бесконечной рекурсии при сериализации Entity?</span>
+            </li><li class="question" data-text="Что такое JPQL и чем он отличается от SQL?">
+              <span class="question-number">#129</span>
+              <span class="question-text">Что такое JPQL и чем он отличается от SQL?</span>
+            </li><li class="question" data-text="Что такое Criteria API и когда его использовать?">
+              <span class="question-number">#130</span>
+              <span class="question-text">Что такое Criteria API и когда его использовать?</span>
+            </li><li class="question" data-text="Как использовать JOIN FETCH для решения проблемы N+1?">
+              <span class="question-number">#131</span>
+              <span class="question-text">Как использовать JOIN FETCH для решения проблемы N+1?</span>
+            </li><li class="question" data-text="Что такое projection в JPA?">
+              <span class="question-number">#132</span>
+              <span class="question-text">Что такое projection в JPA?</span>
+            </li><li class="question" data-text="Какие типы наследования поддерживает JPA?">
+              <span class="question-number">#133</span>
+              <span class="question-text">Какие типы наследования поддерживает JPA?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-04" data-total="8" style="--accent: #f97316;">
+        <details open>
+          <summary>
+            <span class="topic-marker">04</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 17</span>
+              <span class="topic-title">Микросервисы: БД и распределённые транзакции</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">4. Средний+</span>
+              <span class="section-count">8 вопросов</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">DB-related вопросы #78-81, #87-88, #90-91 из PDF: Saga, распределенные транзакции, шардирование, партиционирование и Database per Service.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое паттерн Saga и когда его использовать?">
+              <span class="question-number">#78</span>
+              <span class="question-text">Что такое паттерн Saga и когда его использовать?</span>
+            </li><li class="question" data-text="В чём разница между хореографией и оркестрацией в Saga?">
+              <span class="question-number">#79</span>
+              <span class="question-text">В чём разница между хореографией и оркестрацией в Saga?</span>
+            </li><li class="question" data-text="Как реализовать распределённые транзакции в микросервисах?">
+              <span class="question-number">#80</span>
+              <span class="question-text">Как реализовать распределённые транзакции в микросервисах?</span>
+            </li><li class="question" data-text="Что такое компенсирующие транзакции?">
+              <span class="question-number">#81</span>
+              <span class="question-text">Что такое компенсирующие транзакции?</span>
+            </li><li class="question" data-text="Что такое шардирование (sharding)?">
+              <span class="question-number">#87</span>
+              <span class="question-text">Что такое шардирование (sharding)?</span>
+            </li><li class="question" data-text="В чём разница между шардированием и партиционированием?">
+              <span class="question-number">#88</span>
+              <span class="question-text">В чём разница между шардированием и партиционированием?</span>
+            </li><li class="question" data-text="Что такое паттерн Database per Service?">
+              <span class="question-number">#90</span>
+              <span class="question-text">Что такое паттерн Database per Service?</span>
+            </li><li class="question" data-text="Какие проблемы возникают при использовании общей базы данных?">
+              <span class="question-number">#91</span>
+              <span class="question-text">Какие проблемы возникают при использовании общей базы данных?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-05" data-total="3" style="--accent: #7c3aed;">
+        <details open>
+          <summary>
+            <span class="topic-marker">05</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 5</span>
+              <span class="topic-title">Spring: @Transactional и proxy</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">5. Продвинутый</span>
+              <span class="section-count">3 вопроса</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Transactional-related вопросы #409-411 из PDF: поведение @Transactional, self-invocation и варианты решения.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что делает аннотация @Transactional?">
+              <span class="question-number">#409</span>
+              <span class="question-text">Что делает аннотация @Transactional?</span>
+            </li><li class="question" data-text="Почему @Transactional не работает при self-invocation?">
+              <span class="question-number">#410</span>
+              <span class="question-text">Почему @Transactional не работает при self-invocation?</span>
+            </li><li class="question" data-text="Как решить проблему с self-invocation?">
+              <span class="question-number">#411</span>
+              <span class="question-text">Как решить проблему с self-invocation?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <section class="favorite-test-panel" aria-label="Тест по вопросам со звездочкой">
+      <div>
+        <span class="favorite-test-kicker">Тест по избранному</span>
+        <h2>Вопросы со звездочкой</h2>
+      </div>
+      <button id="openFavoriteTests" class="button favorite-test-button" type="button">Запустить тест · ★ <span id="favoriteTestCount">0</span></button>
+    </section>
+
+    <footer>
+      <a href="index.html">На главную</a> · Источник вопросов: Вопросы_для_собеседования_Java.pdf. Краткие ответы добавлены для работы кнопок “Ответ” и тестового режима.
+    </footer>
+  </main>
+  
+  <script>
+    const searchInput = document.querySelector('#search');
+    const topics = Array.from(document.querySelectorAll('.topic'));
+    const allQuestions = Array.from(document.querySelectorAll('.question'));
+    const visibleCount = document.querySelector('#visibleCount');
+    const checkedCount = document.querySelector('#checkedCount');
+    const favoriteCount = document.querySelector('#favoriteCount');
+    const resetChecks = document.querySelector('#resetChecks');
+    const openTestsButton = document.querySelector('#openTests');
+    const openFavoriteTestsButton = document.querySelector('#openFavoriteTests');
+    const favoriteTestCount = document.querySelector('#favoriteTestCount');
+    const totalCount = Number(document.body.dataset.totalQuestions);
+    const emptyState = document.querySelector('#emptyState');
+    const storageKey = 'pdf-hibernate-jpa-db-checklist-v1';
+    const favoritesKey = 'pdf-hibernate-jpa-db-favorites-v1';
+    const answerTexts = {
+      "q-496": "Индексы ускоряют поиск, фильтрацию, сортировку и соединения, потому что позволяют базе не читать всю таблицу. Цена индекса - место на диске и дополнительная работа при INSERT, UPDATE и DELETE.",
+      "q-497": "B-tree хранит ключи в отсортированной сбалансированной структуре. Это дает быстрый поиск точных значений, диапазонов и поддержку ORDER BY по подходящему порядку индекса.",
+      "q-498": "Составной индекс строится по нескольким колонкам в заданном порядке. Он эффективен, когда запрос использует левый префикс индекса, например индекс (a, b) хорошо подходит для условия по a или a и b.",
+      "q-499": "Индекс стоит создавать под реальные частые запросы, которые фильтруют, сортируют или соединяют большие таблицы. Перед добавлением индекса нужно смотреть селективность, план запроса и влияние на запись.",
+      "q-500": "Индексы занимают место, замедляют запись, требуют обслуживания и могут стать бесполезными при неподходящих запросах или низкой селективности. Слишком много индексов усложняет работу оптимизатора.",
+      "q-501": "Кардинальность показывает, сколько разных значений есть в индексируемой колонке или комбинации колонок. Чем выше селективность условия, тем больше шанс, что индекс будет полезен.",
+      "q-502": "Основные типы: INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN и CROSS JOIN. Также часто говорят про self join, semi-join и anti-join как паттерны запросов.",
+      "q-503": "INNER JOIN возвращает только совпавшие строки из обеих таблиц. LEFT JOIN сохраняет все строки левой таблицы и подставляет NULL справа, если совпадения нет.",
+      "q-504": "Нет универсального ответа: зависит от задачи, данных, индексов и оптимизатора. На интервью важно объяснить план выполнения, читаемость и проверить EXPLAIN ANALYZE на реальной базе.",
+      "q-505": "Коррелированный подзапрос ссылается на строки внешнего запроса. Логически он вычисляется для каждой внешней строки, поэтому может быть дорогим, если оптимизатор не сможет его переписать.",
+      "q-506": "WHERE фильтрует строки до группировки, а HAVING фильтрует группы после GROUP BY. Поэтому условия по агрегатам вроде COUNT(*) > 5 пишут в HAVING.",
+      "q-507": "GROUP BY объединяет строки в группы по указанным выражениям. После этого можно применять агрегатные функции: COUNT, SUM, AVG, MIN, MAX.",
+      "q-508": "HAVING используют, когда нужно отфильтровать результат после группировки, особенно по агрегатным значениям. Для обычных условий без агрегатов предпочтительнее WHERE.",
+      "q-509": "Оконные функции считают значения по набору связанных строк, не схлопывая результат как GROUP BY. Примеры: ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), SUM() OVER.",
+      "q-510": "ROW_NUMBER() назначает уникальный порядковый номер строке внутри окна. При одинаковых значениях сортировки номера все равно будут разными.",
+      "q-511": "RANK() присваивает одинаковый ранг строкам с одинаковым порядком и оставляет пропуски. DENSE_RANK() тоже дает одинаковый ранг, но без пропусков в следующем значении.",
+      "q-512": "PostgreSQL хранит версии строк, чтобы читатели и писатели меньше блокировали друг друга. Транзакция видит snapshot данных, а старые версии позже очищаются VACUUM.",
+      "q-513": "VACUUM очищает мертвые версии строк и делает место доступным для повторного использования. Autovacuum важен для контроля bloat и стабильной производительности.",
+      "q-514": "ANALYZE собирает статистику по таблицам и колонкам. Оптимизатор использует эту статистику для выбора плана выполнения запроса.",
+      "q-515": "Explain plan показывает, как база собирается выполнять запрос: scans, joins, sort, aggregate, стоимость и ожидаемое число строк. EXPLAIN ANALYZE дополнительно выполняет запрос и показывает фактическое время.",
+      "q-516": "Нужно взять конкретный slow query, посмотреть EXPLAIN ANALYZE, проверить индексы, селективность, join cardinality, сортировки, объем данных и N+1 на уровне ORM.",
+      "q-240": "ACID - Atomicity, Consistency, Isolation, Durability. Эти свойства означают атомарность изменений, сохранение инвариантов, изоляцию параллельных транзакций и надежность commit.",
+      "q-241": "Стандартные уровни: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ и SERIALIZABLE. Реальные гарантии могут отличаться между СУБД.",
+      "q-242": "READ UNCOMMITTED допускает чтение незакоммиченных изменений другой транзакции. На практике многие MVCC-СУБД либо не поддерживают его буквально, либо ведут себя ближе к READ COMMITTED.",
+      "q-243": "READ COMMITTED позволяет читать только закоммиченные данные на момент каждого SQL statement. Повторный SELECT в той же транзакции может увидеть новые committed-изменения.",
+      "q-244": "REPEATABLE READ обычно гарантирует, что повторное чтение уже прочитанных строк в транзакции будет стабильным. Детали phantom read зависят от СУБД.",
+      "q-245": "SERIALIZABLE стремится дать результат, эквивалентный последовательному выполнению транзакций. Это самый строгий уровень, но он чаще требует retry при конфликтах.",
+      "q-246": "Dirty read - чтение незакоммиченных данных другой транзакции. Если та транзакция откатится, прочитанное значение никогда не было зафиксированным состоянием базы.",
+      "q-247": "Non-repeatable read возникает, когда один и тот же SELECT строки внутри транзакции возвращает разные значения из-за commit другой транзакции.",
+      "q-248": "Phantom read возникает, когда повторный запрос по условию видит новый или исчезнувший набор строк. Это аномалия диапазонов, а не только одной записи.",
+      "q-249": "Lost update возникает, когда две транзакции читают одно состояние, обе считают новое значение, а последняя запись затирает результат первой. Лечат @Version, locks или атомарным UPDATE.",
+      "q-250": "В PostgreSQL уровень изоляции по умолчанию - READ COMMITTED. При необходимости можно явно выбрать REPEATABLE READ или SERIALIZABLE.",
+      "q-251": "В MySQL InnoDB уровень изоляции по умолчанию обычно REPEATABLE READ. Важно уточнять движок и настройки конкретной базы.",
+      "q-252": "Propagation определяет, как метод с @Transactional участвует в существующей транзакции: присоединяется, создает новую, требует существующую или работает без нее.",
+      "q-253": "NESTED создает savepoint внутри текущей транзакции, если технология это поддерживает. Откат nested-части может вернуться к savepoint без отката всей внешней транзакции.",
+      "q-254": "REQUIRED использует текущую транзакцию или создает новую, если ее нет. REQUIRES_NEW приостанавливает текущую транзакцию и открывает отдельную независимую.",
+      "q-255": "@Transactional объявляет границы транзакции для метода или класса. Spring применяет ее через proxy/aspect и управляет begin, commit и rollback.",
+      "q-256": "@Transactional можно ставить на класс или метод, обычно на service layer. На private-методах и при self-invocation через proxy она не сработает ожидаемо.",
+      "q-257": "Rollback отменяет незакоммиченные изменения текущей транзакции. После rollback операция считается незафиксированной и должна быть повторена или компенсирована бизнес-логикой.",
+      "q-258": "В Spring rollback по умолчанию происходит для RuntimeException и Error. Checked exceptions не откатывают транзакцию без явной настройки.",
+      "q-259": "Нужно указать rollbackFor в @Transactional, например @Transactional(rollbackFor = IOException.class). Также можно настраивать правила rollback программно.",
+      "q-260": "Readonly транзакция сообщает инфраструктуре, что операция предназначена для чтения. Это может включить оптимизации, но не является универсальной защитой от записи во всех СУБД.",
+      "q-261": "Это self-invocation: вызов не проходит через Spring proxy, поэтому transactional advice не применяется. Настройки вложенного метода могут быть проигнорированы.",
+      "q-104": "N+1 возникает, когда один запрос загружает N сущностей, а затем для каждой выполняется отдельный запрос за связью. Решения: JOIN FETCH, EntityGraph, batch fetching, DTO projection или точный запрос под use case.",
+      "q-105": "Lazy загружает связь при первом обращении, Eager пытается загрузить сразу вместе с entity. Eager часто приводит к лишним данным и неожиданным запросам, поэтому по умолчанию лучше проектировать явную загрузку.",
+      "q-106": "Lazy обычно выбирают для большинства связей, особенно коллекций. Eager оправдан только для маленьких обязательных данных, которые почти всегда нужны вместе с entity.",
+      "q-107": "LazyInitializationException возникает при обращении к lazy-связи вне открытого persistence context. Избегают через fetch join, EntityGraph, DTO-запрос или корректные transactional boundaries.",
+      "q-108": "Помимо LAZY/EAGER, Hibernate поддерживает разные способы загрузки: join fetch, select fetch, batch fetch и subselect fetch. Выбор влияет на число запросов и объем результата.",
+      "q-109": "@BatchSize говорит Hibernate загружать lazy-сущности или коллекции пачками по нескольким id. Это снижает N+1, превращая много одиночных SELECT в несколько SELECT IN.",
+      "q-110": "Типичные состояния entity: transient, persistent, detached и removed. Переходы происходят через persist, find, merge, detach, remove, flush и закрытие persistence context.",
+      "q-111": "Transient - новый объект вне persistence context. Persistent - managed-объект отслеживается Hibernate. Detached - раньше был managed, но context закрыт или объект отсоединен. Removed - помечен на удаление.",
+      "q-112": "Кэш первого уровня - обязательный кэш внутри Session или persistence context. Он гарантирует identity map: один id соответствует одному managed-объекту в рамках текущей Session.",
+      "q-113": "Second-level cache живет на уровне SessionFactory и может переиспользоваться между Session. Его стоит использовать для часто читаемых и редко изменяемых данных.",
+      "q-114": "Нужно выбрать cache provider, включить second-level cache в настройках Hibernate, пометить сущности или коллекции @Cache и выбрать concurrency strategy.",
+      "q-115": "Dirty checking - механизм отслеживания изменений managed entity. При flush Hibernate сравнивает текущее состояние со snapshot и генерирует UPDATE для измененных данных.",
+      "q-116": "Flush синхронизирует persistence context с базой, выполняя накопленные INSERT, UPDATE и DELETE. Flush не равен commit и может происходить перед query или перед commit.",
+      "q-117": "persist делает новый объект managed и планирует INSERT. merge копирует состояние detached-объекта в managed-экземпляр и возвращает этот managed-экземпляр.",
+      "q-118": "refresh перечитывает состояние entity из базы и перезаписывает локальные изменения managed-объекта. Его используют, когда нужно синхронизироваться с актуальным состоянием БД.",
+      "q-119": "EntityManager - стандартный JPA API для persistence context. Session - Hibernate API с дополнительными возможностями; в Hibernate EntityManager можно unwrap-нуть до Session.",
+      "q-120": "Добавляют поле версии с @Version. При update JPA проверяет, что версия в базе не изменилась; при конфликте выбрасывается OptimisticLockException.",
+      "q-121": "Используют LockModeType.PESSIMISTIC_READ или PESSIMISTIC_WRITE в find/query. Провайдер транслирует это в блокировки БД, например SELECT FOR UPDATE.",
+      "q-122": "@Version помечает поле версии entity для optimistic locking. Оно помогает обнаруживать lost update и конкурентные изменения одной строки.",
+      "q-123": "Cascade распространяет операции с parent entity на связанные entity: persist, merge, remove, refresh, detach. Каскады должны соответствовать границам агрегата, иначе можно затронуть чужие данные.",
+      "q-124": "Основные типы: PERSIST, MERGE, REMOVE, REFRESH, DETACH и ALL. ALL включает все операции и требует осторожности, особенно в many-to-many.",
+      "q-125": "orphanRemoval удаляет child entity, когда она больше не связана с parent через отношение. Это удобно для жизненного цикла дочерних объектов внутри агрегата.",
+      "q-126": "Обычно foreign key находится на стороне many, поэтому @ManyToOne является owning side, а @OneToMany использует mappedBy. В bidirectional-связи нужно синхронизировать обе стороны в Java-коде.",
+      "q-127": "У bidirectional-связи есть owning side и inverse side. JPA учитывает owning side для записи в БД, а обе стороны в объектной модели нужно обновлять вручную.",
+      "q-128": "Не стоит напрямую сериализовать entity-граф наружу. Используют DTO, Jackson-аннотации вроде @JsonIgnore/@JsonManagedReference, настройки identity или projection.",
+      "q-129": "JPQL работает с entity, их полями и связями, а SQL работает с таблицами и колонками. Hibernate переводит JPQL в SQL с учетом mapping и dialect.",
+      "q-130": "Criteria API строит JPA-запросы программно. Его используют для динамических фильтров и типобезопасного построения query, хотя он более многословен, чем JPQL.",
+      "q-131": "В JPQL пишут JOIN FETCH для нужной связи, чтобы загрузить ее вместе с основной entity одним запросом. Для коллекций нужно помнить про дубликаты и ограничения pagination.",
+      "q-132": "Projection - выборка не всей entity, а нужных полей или DTO. Она снижает объем данных и помогает строить read model без lazy-связей.",
+      "q-133": "JPA поддерживает SINGLE_TABLE, JOINED и TABLE_PER_CLASS. SINGLE_TABLE обычно быстрее и проще, JOINED нормализует таблицы, TABLE_PER_CLASS используется реже.",
+      "q-78": "Saga разбивает распределенную бизнес-операцию на локальные транзакции и компенсирующие действия. Ее используют, когда нельзя или не хочется держать одну распределенную транзакцию между сервисами.",
+      "q-79": "В choreography сервисы реагируют на события друг друга без центрального координатора. В orchestration отдельный orchestrator управляет шагами, командами и компенсациями.",
+      "q-80": "Чаще избегают 2PC и используют Saga, outbox, idempotency, retry и компенсации. Если нужна строгая атомарность между ресурсами, применяют XA/2PC, но это сложнее и дороже.",
+      "q-81": "Компенсирующая транзакция логически отменяет эффект уже выполненного шага Saga. Она не всегда является техническим rollback, потому что данные могли быть уже зафиксированы и видны другим участникам.",
+      "q-87": "Шардирование делит данные между разными узлами по shard key. Это помогает масштабировать объем и нагрузку, но усложняет запросы, транзакции, балансировку и перенос данных.",
+      "q-88": "Шардирование распределяет данные между разными узлами или базами. Партиционирование делит таблицу на части внутри одной СУБД или логического кластера.",
+      "q-90": "Database per Service означает, что каждый микросервис владеет своей базой или схемой и не дает другим сервисам писать в свои таблицы напрямую. Интеграция идет через API или события.",
+      "q-91": "Общая база связывает сервисы схемой, мешает независимым релизам, размывает ownership данных и повышает риск конфликтов. Также сложнее изолировать нагрузку и права доступа.",
+      "q-409": "@Transactional в Spring создает транзакционную границу вокруг метода через proxy или aspect. Spring открывает транзакцию, передает connection, затем делает commit или rollback.",
+      "q-410": "При self-invocation метод вызывается напрямую внутри того же объекта и не проходит через Spring proxy. Поэтому транзакционный advice не перехватывает вызов.",
+      "q-411": "Можно вынести транзакционный метод в другой bean, вызвать его через proxy, использовать self-injection осторожно или включить AspectJ weaving. Обычно самый чистый вариант - разделить сервисные методы по bean-ам."
+};
+    let checkedQuestions = loadSet(storageKey);
+    let favoriteQuestions = loadSet(favoritesKey);
+
+    function normalize(value) {
+      return value.toLocaleLowerCase('ru-RU');
+    }
+
+    function loadSet(key) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        return new Set(Array.isArray(saved) ? saved : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveSet(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(Array.from(value)));
+      } catch {
+      }
+    }
+
+    function getQuestionId(question, index) {
+      const originalNumber = question.querySelector('.question-number')?.textContent.replace(/[^0-9]/g, '');
+      return originalNumber ? `q-${originalNumber}` : `q-${index + 1}`;
+    }
+
+    function updateChecklistProgress() {
+      checkedCount.textContent = `${checkedQuestions.size} из ${totalCount}`;
+    }
+
+    function updateFavoriteProgress() {
+      favoriteCount.textContent = `${favoriteQuestions.size} из ${totalCount}`;
+      favoriteTestCount.textContent = String(favoriteQuestions.size);
+      openFavoriteTestsButton.disabled = favoriteQuestions.size === 0;
+    }
+
+    function initializeChecklist() {
+      const knownQuestionIds = new Set();
+
+      allQuestions.forEach((question, index) => {
+        const questionId = getQuestionId(question, index);
+        knownQuestionIds.add(questionId);
+        question.dataset.questionId = questionId;
+
+        const label = document.createElement('label');
+        label.className = 'check-wrap';
+        label.setAttribute('aria-label', `Отметить вопрос ${questionId.replace('q-', '#')}`);
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'question-check';
+        checkbox.checked = checkedQuestions.has(questionId);
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            checkedQuestions.add(questionId);
+          } else {
+            checkedQuestions.delete(questionId);
+          }
+
+          question.classList.toggle('is-done', checkbox.checked);
+          saveSet(storageKey, checkedQuestions);
+          updateChecklistProgress();
+        });
+
+        label.append(checkbox);
+        question.prepend(label);
+        question.classList.toggle('is-done', checkbox.checked);
+
+        const answerButton = document.createElement('button');
+        answerButton.type = 'button';
+        answerButton.className = 'answer-toggle';
+        answerButton.textContent = 'Ответ';
+        answerButton.setAttribute('aria-expanded', 'false');
+        answerButton.setAttribute('aria-controls', `${questionId}-answer`);
+        answerButton.title = 'Показать ответ';
+
+        const answerPanel = document.createElement('div');
+        answerPanel.className = 'answer-panel';
+        answerPanel.id = `${questionId}-answer`;
+        answerPanel.hidden = true;
+        answerPanel.textContent = answerTexts[questionId] || 'В PDF есть только вопрос; ответ нужно добавить отдельно.';
+
+        answerButton.addEventListener('click', () => {
+          const isOpen = answerButton.getAttribute('aria-expanded') !== 'true';
+          answerButton.setAttribute('aria-expanded', String(isOpen));
+          answerButton.textContent = isOpen ? 'Скрыть' : 'Ответ';
+          answerButton.title = isOpen ? 'Скрыть ответ' : 'Показать ответ';
+          answerPanel.hidden = !isOpen;
+        });
+
+        const favoriteButton = document.createElement('button');
+        favoriteButton.type = 'button';
+        favoriteButton.className = 'favorite-toggle';
+        favoriteButton.setAttribute('aria-label', `Отметить вопрос ${questionId.replace('q-', '#')} как понравившийся`);
+        favoriteButton.setAttribute('aria-pressed', String(favoriteQuestions.has(questionId)));
+        favoriteButton.title = 'Понравился вопрос';
+
+        favoriteButton.addEventListener('click', () => {
+          const isFavorite = !favoriteQuestions.has(questionId);
+          if (isFavorite) {
+            favoriteQuestions.add(questionId);
+          } else {
+            favoriteQuestions.delete(questionId);
+          }
+
+          question.classList.toggle('is-favorite', isFavorite);
+          favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+          saveSet(favoritesKey, favoriteQuestions);
+          updateFavoriteProgress();
+        });
+
+        question.append(answerButton, favoriteButton, answerPanel);
+        question.classList.toggle('is-favorite', favoriteQuestions.has(questionId));
+      });
+
+      checkedQuestions = new Set(Array.from(checkedQuestions).filter((questionId) => knownQuestionIds.has(questionId)));
+      favoriteQuestions = new Set(Array.from(favoriteQuestions).filter((questionId) => knownQuestionIds.has(questionId)));
+      saveSet(storageKey, checkedQuestions);
+      saveSet(favoritesKey, favoriteQuestions);
+      updateChecklistProgress();
+      updateFavoriteProgress();
+    }
+
+    function applySearch() {
+      const term = normalize(searchInput.value.trim());
+      let visibleQuestions = 0;
+      let visibleTopics = 0;
+
+      topics.forEach((topic) => {
+        const questions = Array.from(topic.querySelectorAll('.question'));
+        let topicVisibleQuestions = 0;
+
+        questions.forEach((question) => {
+          const matches = !term || normalize(question.dataset.text).includes(term);
+          question.hidden = !matches;
+          if (matches) {
+            topicVisibleQuestions += 1;
+            visibleQuestions += 1;
+          }
+        });
+
+        topic.hidden = topicVisibleQuestions === 0;
+        if (topicVisibleQuestions > 0) visibleTopics += 1;
+        topic.querySelector('.section-count').textContent = `${topicVisibleQuestions} / ${topic.dataset.total} вопросов`;
+      });
+
+      visibleCount.textContent = `${visibleQuestions} из ${totalCount}`;
+      emptyState.classList.toggle('is-visible', visibleQuestions === 0);
+      document.body.dataset.visibleTopics = String(visibleTopics);
+    }
+
+    function initializeTopicTests() {
+      topics.forEach((topic) => {
+        if (topic.querySelector('.topic-test-button')) return;
+
+        const side = topic.querySelector('.topic-side');
+        const title = topic.querySelector('.topic-title')?.textContent.trim() || 'теме';
+        if (!side) return;
+
+        const testButton = document.createElement('button');
+        testButton.type = 'button';
+        testButton.className = 'topic-test-button';
+        testButton.textContent = 'Тест';
+        testButton.setAttribute('aria-label', `Открыть тест по теме ${title}`);
+        testButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openTestWindow(topic.id);
+        });
+
+        side.append(testButton);
+      });
+    }
+
+    function collectTestTopics() {
+      return topics.map((topic, topicIndex) => {
+        const accentMatch = /--accent:\s*([^;]+)/.exec(topic.getAttribute('style') || '');
+        const title = topic.querySelector('.topic-title')?.textContent.trim() || `Тема ${topicIndex + 1}`;
+        const kicker = topic.querySelector('.topic-kicker')?.textContent.trim() || '';
+
+        return {
+          id: topic.id,
+          index: String(topicIndex + 1).padStart(2, '0'),
+          title,
+          kicker,
+          accent: accentMatch ? accentMatch[1].trim() : '#2563eb',
+          questions: Array.from(topic.querySelectorAll('.question')).map((question, questionIndex) => {
+            const questionId = question.dataset.questionId || getQuestionId(question, questionIndex);
+            return {
+              id: questionId,
+              number: question.querySelector('.question-number')?.textContent.trim() || questionId.replace('q-', '#'),
+              text: question.querySelector('.question-text')?.textContent.trim() || question.dataset.text || '',
+              answer: answerTexts[questionId] || 'Ответ пока не добавлен.'
+            };
+          })
+        };
+      });
+    }
+
+    function collectFavoriteTestTopics() {
+      const favoriteItems = [];
+      const seenQuestionIds = new Set();
+
+      collectTestTopics().forEach((topic) => {
+        topic.questions.forEach((question) => {
+          if (!favoriteQuestions.has(question.id) || seenQuestionIds.has(question.id)) return;
+          seenQuestionIds.add(question.id);
+          favoriteItems.push(Object.assign({
+            topicId: topic.id,
+            topicTitle: topic.title,
+            topicIndex: topic.index,
+            kicker: topic.kicker,
+            accent: topic.accent
+          }, question));
+        });
+      });
+
+      return [{
+        id: 'favorite-questions',
+        index: '★',
+        title: 'Вопросы со звездочкой',
+        kicker: 'Избранное',
+        accent: '#f59e0b',
+        questions: favoriteItems
+      }];
+    }
+
+    function openTestWindow(initialTopicId = 'all', providedTestTopics = null) {
+      const testTopics = providedTestTopics || collectTestTopics();
+      const popup = window.open('', 'pdf-hibernate-jpa-db-tests', 'width=1240,height=900,scrollbars=yes,resizable=yes');
+
+      if (!popup) {
+        alert('Браузер заблокировал отдельное окно для тестов.');
+        return;
+      }
+
+      popup.document.open();
+      popup.document.write(buildTestWindowHtml(testTopics, initialTopicId));
+      popup.document.close();
+      popup.focus();
+    }
+
+    function openFavoriteTestWindow() {
+      const favoriteTestTopics = collectFavoriteTestTopics();
+      if (!favoriteTestTopics[0].questions.length) {
+        alert('Сначала отметь вопросы звездочкой.');
+        updateFavoriteProgress();
+        return;
+      }
+
+      openTestWindow('favorite-questions', favoriteTestTopics);
+    }
+
+    function buildTestWindowHtml(testTopics, initialTopicId) {
+      const topicsJson = JSON.stringify(testTopics).replace(/</g, '\u003c');
+      const initialTopicJson = JSON.stringify(initialTopicId);
+
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF: Hibernate, JPA и БД - тесты</title>
+  <style>
+    :root { color-scheme: light; --bg: #f5f7fb; --paper: #ffffff; --ink: #17202a; --muted: #5b6472; --soft: #eef2f6; --line: #dce3eb; --strong-line: #c6d0dc; --danger: #b91c1c; --warn: #b45309; --ok: #15803d; --shadow: 0 14px 34px rgba(15, 23, 42, 0.08); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, rgba(8, 145, 178, 0.08), rgba(255, 255, 255, 0) 340px), var(--bg); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.5; letter-spacing: 0; }
+    button, select { font: inherit; }
+    .exam-shell { width: min(1280px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 42px; }
+    .exam-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; padding: 10px 0 18px; border-bottom: 1px solid var(--line); }
+    h1 { margin: 0; font-size: 1.7rem; line-height: 1.12; font-weight: 850; letter-spacing: 0; }
+    .exam-meta { margin-top: 8px; color: var(--muted); font-size: 0.94rem; }
+    .close-button, .control-button, .topic-tab, .action-button { border: 1px solid var(--strong-line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 800; transition: background 140ms ease, border-color 140ms ease, color 140ms ease; }
+    .close-button, .control-button { height: 40px; padding: 0 12px; white-space: nowrap; }
+    .close-button:hover, .control-button:hover, .topic-tab:hover, .action-button:hover { border-color: #94a3b8; background: #f8fafc; }
+    .control-bar { position: sticky; top: 0; z-index: 4; display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 10px; align-items: center; margin: 18px 0; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06); backdrop-filter: blur(12px); }
+    .topic-select { min-width: 0; height: 40px; padding: 0 10px; border: 1px solid var(--strong-line); border-radius: 8px; background: #fff; color: var(--ink); }
+    .progress-line { grid-column: 1 / -1; display: grid; gap: 7px; }
+    .progress-copy { display: flex; gap: 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.9rem; }
+    .progress-track { height: 8px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+    .progress-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #16a34a, #0891b2); transition: width 160ms ease; }
+    .exam-layout { display: grid; grid-template-columns: 278px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .topic-rail { position: sticky; top: 88px; display: grid; gap: 8px; }
+    .topic-tab { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 48px; padding: 8px; text-align: left; border-left: 4px solid var(--accent, #2563eb); }
+    .topic-tab.is-active { border-color: var(--accent, #2563eb); background: color-mix(in srgb, var(--accent, #2563eb), white 92%); color: var(--accent, #2563eb); }
+    .topic-index { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--accent, #2563eb), white 86%); color: var(--accent, #2563eb); font-size: 0.78rem; }
+    .topic-name { min-width: 0; overflow-wrap: anywhere; }
+    .topic-count { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+    .questions-pane { display: grid; gap: 10px; }
+    .test-card { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-left: 5px solid var(--accent, #2563eb); border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
+    .test-card[data-status="known"] { border-color: color-mix(in srgb, var(--ok), white 56%); border-left-color: var(--ok); background: color-mix(in srgb, var(--ok), white 96%); }
+    .test-card[data-status="review"] { border-color: color-mix(in srgb, var(--warn), white 48%); border-left-color: var(--warn); background: color-mix(in srgb, var(--warn), white 96%); }
+    .card-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .tag { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 8px; border-radius: 8px; background: var(--soft); color: #334155; font-size: 0.78rem; font-weight: 850; }
+    .tag-accent { background: color-mix(in srgb, var(--accent, #2563eb), white 88%); color: var(--accent, #2563eb); }
+    .status { color: var(--muted); font-size: 0.82rem; font-weight: 800; }
+    .test-card[data-status="known"] .status { color: var(--ok); }
+    .test-card[data-status="review"] .status { color: var(--warn); }
+    .prompt { margin: 0; font-size: 1.04rem; font-weight: 820; line-height: 1.35; overflow-wrap: anywhere; }
+    .rubric { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfe; color: #334155; font-size: 0.9rem; }
+    .rubric strong { color: var(--ink); font-size: 0.84rem; }
+    .options { display: grid; gap: 8px; }
+    .option-button { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; min-height: 58px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; text-align: left; transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+    .option-button:hover { border-color: color-mix(in srgb, var(--accent, #2563eb), white 42%); background: color-mix(in srgb, var(--accent, #2563eb), white 97%); }
+    .option-button.is-selected { border-color: var(--accent, #2563eb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #2563eb), transparent 84%); }
+    .option-button.is-correct { border-color: color-mix(in srgb, var(--ok), white 32%); background: color-mix(in srgb, var(--ok), white 92%); }
+    .option-button.is-wrong { border-color: color-mix(in srgb, var(--danger), white 36%); background: color-mix(in srgb, var(--danger), white 94%); }
+    .option-letter { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--soft); color: #334155; font-size: 0.82rem; font-weight: 850; }
+    .option-button.is-selected .option-letter { background: var(--accent, #2563eb); color: #fff; }
+    .option-button.is-correct .option-letter { background: var(--ok); color: #fff; }
+    .option-button.is-wrong .option-letter { background: var(--danger); color: #fff; }
+    .option-text { min-width: 0; color: #253244; font-size: 0.94rem; line-height: 1.46; overflow-wrap: anywhere; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .action-button { min-height: 34px; padding: 0 10px; font-size: 0.88rem; }
+    .action-primary { border-color: color-mix(in srgb, var(--accent, #2563eb), white 52%); background: color-mix(in srgb, var(--accent, #2563eb), white 92%); color: var(--accent, #2563eb); }
+    .action-primary:hover { border-color: var(--accent, #2563eb); background: var(--accent, #2563eb); color: #fff; }
+    .feedback, .warning { display: grid; gap: 6px; padding: 12px 14px; border-radius: 8px; color: #334155; font-size: 0.92rem; }
+    .feedback { border: 1px solid color-mix(in srgb, var(--accent, #2563eb), white 70%); background: color-mix(in srgb, var(--accent, #2563eb), white 96%); }
+    .feedback.is-correct { border-color: color-mix(in srgb, var(--ok), white 54%); background: color-mix(in srgb, var(--ok), white 95%); }
+    .feedback.is-wrong { border-color: color-mix(in srgb, var(--danger), white 58%); background: color-mix(in srgb, var(--danger), white 96%); }
+    .warning { display: none; border: 1px solid color-mix(in srgb, var(--danger), white 62%); background: color-mix(in srgb, var(--danger), white 96%); color: var(--danger); }
+    .warning.is-visible { display: grid; }
+    .feedback strong, .warning strong { color: var(--ink); font-size: 0.86rem; }
+    .feedback p, .warning p { margin: 0; }
+    .empty-state { padding: 22px; border: 1px dashed var(--strong-line); border-radius: 8px; background: rgba(255, 255, 255, 0.72); color: var(--muted); text-align: center; }
+    [hidden] { display: none !important; }
+    @media (max-width: 980px) { .exam-header, .exam-layout, .control-bar { grid-template-columns: 1fr; } .topic-rail { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); } .close-button, .control-button { width: 100%; } }
+    @media (max-width: 620px) { .exam-shell { width: min(100% - 20px, 1280px); padding-top: 14px; } h1 { font-size: 1.38rem; } .topic-rail { grid-template-columns: 1fr; } .progress-copy { display: grid; gap: 4px; justify-content: stretch; } .card-head { display: grid; justify-content: stretch; } .card-actions { display: grid; grid-template-columns: 1fr; } .action-button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="exam-shell">
+    <header class="exam-header">
+      <div>
+        <h1>PDF: Hibernate, JPA и базы данных - тесты</h1>
+        <div class="exam-meta"><span id="scopeCount">0 заданий</span> · 4 варианта · один правильный ответ</div>
+      </div>
+      <button id="closeWindow" class="close-button" type="button">Закрыть</button>
+    </header>
+    <section class="control-bar" aria-label="Управление тестами">
+      <select id="topicSelect" class="topic-select" aria-label="Тема теста"></select>
+      <button id="shuffleButton" class="control-button" type="button" aria-pressed="false">Смешать</button>
+      <button id="reviewButton" class="control-button" type="button" aria-pressed="false">Только повтор</button>
+      <button id="resetProgress" class="control-button" type="button">Сбросить прогресс</button>
+      <div class="progress-line">
+        <div class="progress-copy">
+          <span id="progressText">0 верно · 0 повторить · 0 без ответа</span>
+          <span id="modeText">Все темы</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><span id="progressFill" class="progress-fill"></span></div>
+      </div>
+    </section>
+    <div class="exam-layout">
+      <aside id="topicRail" class="topic-rail" aria-label="Темы"></aside>
+      <section id="questionsPane" class="questions-pane" aria-live="polite"></section>
+    </div>
+  </main>
+  <script>
+    const testTopics = ${topicsJson};
+    const initialTopicId = ${initialTopicJson};
+    const storageKey = 'pdf-hibernate-jpa-db-test-progress-v1';
+    const optionLetters = ['A', 'B', 'C', 'D'];
+    const genericDistractors = [
+      'Это утверждение звучит похоже, но смешивает разные уровни: SQL, транзакции, ORM и инфраструктуру приложения.',
+      'Этот вариант неверен, потому что игнорирует границы транзакции, состояние persistence context или работу оптимизатора БД.',
+      'Так обычно не делают в production: нужно учитывать consistency, locks, индексы, lazy loading и стоимость запросов.',
+      'Это не универсальное правило; корректный ответ зависит от механизма, который описан в вопросе.'
+    ];
+
+    let progress = loadJson(storageKey, {});
+    let currentTopicId = testTopics.some(function(topic) { return topic.id === initialTopicId; }) ? initialTopicId : 'all';
+    let onlyReview = false;
+    let shuffled = false;
+    let shuffleSeed = 1;
+    const topicSelect = document.querySelector('#topicSelect');
+    const topicRail = document.querySelector('#topicRail');
+    const questionsPane = document.querySelector('#questionsPane');
+    const scopeCount = document.querySelector('#scopeCount');
+    const progressText = document.querySelector('#progressText');
+    const modeText = document.querySelector('#modeText');
+    const progressFill = document.querySelector('#progressFill');
+    const shuffleButton = document.querySelector('#shuffleButton');
+    const reviewButton = document.querySelector('#reviewButton');
+
+    function loadJson(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || 'null');
+        return value && typeof value === 'object' ? value : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function(char) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char];
+      });
+    }
+
+    function hashValue(value) {
+      let hash = 0;
+      for (let i = 0; i < value.length; i += 1) {
+        hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function sortedBySeed(items, seed) {
+      return items.slice().sort(function(left, right) {
+        return hashValue(left.id + ':' + seed) - hashValue(right.id + ':' + seed);
+      });
+    }
+
+    function allQuestionItems() {
+      return testTopics.flatMap(function(topic) {
+        return topic.questions.map(function(question) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, accent: topic.accent }, question);
+        });
+      });
+    }
+
+    function scopeTopics() {
+      return currentTopicId === 'all' ? testTopics : testTopics.filter(function(topic) { return topic.id === currentTopicId; });
+    }
+
+    function scopeQuestions(ignoreReviewFilter) {
+      let items = scopeTopics().flatMap(function(topic) {
+        return topic.questions.map(function(question) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, accent: topic.accent }, question);
+        });
+      });
+      if (onlyReview && !ignoreReviewFilter) {
+        items = items.filter(function(item) {
+          return progress[item.id] && progress[item.id].status === 'review';
+        });
+      }
+      return shuffled ? sortedBySeed(items, 'scope:' + shuffleSeed) : items;
+    }
+
+    function normalized(value) {
+      return String(value).trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+    }
+
+    function choicesFor(item) {
+      const choices = [{ id: item.id + '-correct', text: item.answer, correct: true }];
+      const seen = new Set([normalized(item.answer)]);
+      const related = allQuestionItems()
+        .filter(function(candidate) { return candidate.id !== item.id; })
+        .map(function(candidate) {
+          const sameTopic = candidate.topicId === item.topicId ? 1000 : 0;
+          return { id: item.id + '-choice-' + candidate.id, text: candidate.answer, correct: false, score: sameTopic + hashValue(item.id + ':' + candidate.id) };
+        })
+        .sort(function(left, right) { return right.score - left.score; });
+
+      related.concat(genericDistractors.map(function(text, index) {
+        return { id: item.id + '-generic-' + index, text: text, correct: false };
+      })).some(function(choice) {
+        const key = normalized(choice.text);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        choices.push(choice);
+        return choices.length >= 4;
+      });
+
+      return sortedBySeed(choices.slice(0, 4), item.id + ':' + shuffleSeed);
+    }
+
+    function statusLabel(status, checked, selectedText) {
+      if (status === 'known') return 'Верно';
+      if (status === 'review') return 'Повторить';
+      if (selectedText && !checked) return 'Выбран вариант';
+      return 'Без ответа';
+    }
+
+    function currentTopicTitle() {
+      if (currentTopicId === 'all') return 'Все темы';
+      const topic = testTopics.find(function(item) { return item.id === currentTopicId; });
+      return topic ? topic.title : 'Все темы';
+    }
+
+    function renderTopicSelect() {
+      topicSelect.innerHTML = '<option value="all">Все темы</option>' + testTopics.map(function(topic) {
+        return '<option value="' + escapeHtml(topic.id) + '">' + topic.index + '. ' + escapeHtml(topic.title) + '</option>';
+      }).join('');
+      topicSelect.value = currentTopicId;
+    }
+
+    function renderTopicRail() {
+      topicRail.innerHTML = testTopics.map(function(topic) {
+        const total = topic.questions.length;
+        const known = topic.questions.filter(function(question) { return progress[question.id] && progress[question.id].status === 'known'; }).length;
+        const review = topic.questions.filter(function(question) { return progress[question.id] && progress[question.id].status === 'review'; }).length;
+        return '<button class="topic-tab ' + (topic.id === currentTopicId ? 'is-active' : '') + '" type="button" data-topic-id="' + escapeHtml(topic.id) + '" style="--accent: ' + escapeHtml(topic.accent) + '">' +
+          '<span class="topic-index">' + topic.index + '</span>' +
+          '<span class="topic-name">' + escapeHtml(topic.title) + '</span>' +
+          '<span class="topic-count">' + known + '/' + total + (review ? ' · ' + review : '') + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
+    function choiceMarkup(choice, index, state) {
+      const selected = state.selectedText === choice.text;
+      const checked = state.checked === true;
+      const classes = ['option-button'];
+      if (selected) classes.push('is-selected');
+      if (checked && choice.correct) classes.push('is-correct');
+      if (checked && selected && !choice.correct) classes.push('is-wrong');
+      return '<button class="' + classes.join(' ') + '" type="button" role="radio" aria-checked="' + String(selected) + '" data-action="select" data-correct="' + String(choice.correct) + '">' +
+        '<span class="option-letter">' + optionLetters[index] + '</span>' +
+        '<span class="option-text">' + escapeHtml(choice.text) + '</span>' +
+      '</button>';
+    }
+
+    function renderQuestions() {
+      const items = scopeQuestions(false);
+      if (!items.length) {
+        questionsPane.innerHTML = '<div class="empty-state">Нет заданий для текущего фильтра.</div>';
+        updateStats();
+        return;
+      }
+      questionsPane.innerHTML = items.map(function(item, index) {
+        const state = progress[item.id] || {};
+        const choices = choicesFor(item);
+        const selectedCorrect = state.selectedText === item.answer;
+        return '<article class="test-card" data-id="' + escapeHtml(item.id) + '" data-status="' + escapeHtml(state.status || '') + '" style="--accent: ' + escapeHtml(item.accent) + '">' +
+          '<div class="card-head"><div class="card-tags">' +
+          '<span class="tag tag-accent">' + escapeHtml(item.number) + '</span>' +
+          '<span class="tag">' + escapeHtml(item.topicIndex) + '. ' + escapeHtml(item.topicTitle) + '</span>' +
+          '<span class="tag">Задание ' + (index + 1) + '</span></div>' +
+          '<span class="status">' + statusLabel(state.status, state.checked, state.selectedText) + '</span></div>' +
+          '<p class="prompt">' + escapeHtml(item.text) + '</p>' +
+          '<div class="rubric"><strong>Выбери самый точный ответ</strong><span>Вопрос взят из PDF, варианты построены по кратким ответам к этим вопросам.</span></div>' +
+          '<div class="options" role="radiogroup" aria-label="Варианты ответа">' + choices.map(function(choice, choiceIndex) { return choiceMarkup(choice, choiceIndex, state); }).join('') + '</div>' +
+          '<div class="warning" data-warning><strong>Вариант не выбран.</strong><p>Сначала выбери один ответ, потом нажми проверку.</p></div>' +
+          '<div class="card-actions"><button class="action-button action-primary" type="button" data-action="check">Проверить</button><button class="action-button" type="button" data-action="clear">Сброс</button></div>' +
+          '<div class="feedback ' + (selectedCorrect ? 'is-correct' : 'is-wrong') + '" data-feedback ' + (state.checked ? '' : 'hidden') + '><strong>' + (selectedCorrect ? 'Верно' : 'Неверно') + '</strong><p>' + escapeHtml(selectedCorrect ? 'Ответ засчитан. Проверь формулировку: ' + item.answer : 'Правильный вариант: ' + item.answer) + '</p></div>' +
+        '</article>';
+      }).join('');
+      updateStats();
+    }
+
+    function updateStats() {
+      const scoped = scopeQuestions(true);
+      const visible = scopeQuestions(false);
+      const known = scoped.filter(function(item) { return progress[item.id] && progress[item.id].status === 'known'; }).length;
+      const review = scoped.filter(function(item) { return progress[item.id] && progress[item.id].status === 'review'; }).length;
+      const remaining = Math.max(scoped.length - known - review, 0);
+      const percent = scoped.length ? Math.round((known / scoped.length) * 100) : 0;
+      scopeCount.textContent = visible.length + ' из ' + scoped.length + ' заданий';
+      progressText.textContent = known + ' верно · ' + review + ' повторить · ' + remaining + ' без ответа';
+      modeText.textContent = currentTopicTitle() + (onlyReview ? ' · только повтор' : '') + (shuffled ? ' · смешано' : '');
+      progressFill.style.width = percent + '%';
+      reviewButton.setAttribute('aria-pressed', String(onlyReview));
+      shuffleButton.setAttribute('aria-pressed', String(shuffled));
+    }
+
+    function currentItemForCard(card) {
+      return allQuestionItems().find(function(item) { return item.id === card.dataset.id; });
+    }
+
+    function selectOption(card, button) {
+      const id = card.dataset.id;
+      const text = button.querySelector('.option-text').textContent;
+      progress[id] = { selectedText: text, checked: false, status: '', updatedAt: new Date().toISOString() };
+      saveJson(storageKey, progress);
+      Array.from(card.querySelectorAll('.option-button')).forEach(function(item) {
+        const selected = item === button;
+        item.classList.toggle('is-selected', selected);
+        item.classList.remove('is-correct', 'is-wrong');
+        item.setAttribute('aria-checked', String(selected));
+      });
+      card.querySelector('[data-feedback]').hidden = true;
+      card.querySelector('[data-warning]').classList.remove('is-visible');
+      card.dataset.status = '';
+      card.querySelector('.status').textContent = 'Выбран вариант';
+      renderTopicRail();
+      updateStats();
+    }
+
+    function checkCard(card) {
+      const item = currentItemForCard(card);
+      const selected = card.querySelector('.option-button.is-selected');
+      const warning = card.querySelector('[data-warning]');
+      const feedback = card.querySelector('[data-feedback]');
+      if (!selected || !item) {
+        warning.classList.add('is-visible');
+        return;
+      }
+      const isCorrect = selected.dataset.correct === 'true';
+      const status = isCorrect ? 'known' : 'review';
+      const selectedText = selected.querySelector('.option-text').textContent;
+      progress[item.id] = { selectedText: selectedText, checked: true, status: status, updatedAt: new Date().toISOString() };
+      saveJson(storageKey, progress);
+      Array.from(card.querySelectorAll('.option-button')).forEach(function(button) {
+        const buttonCorrect = button.dataset.correct === 'true';
+        const buttonSelected = button === selected;
+        button.classList.toggle('is-correct', buttonCorrect);
+        button.classList.toggle('is-wrong', buttonSelected && !buttonCorrect);
+      });
+      card.dataset.status = status;
+      card.querySelector('.status').textContent = statusLabel(status, true, selectedText);
+      warning.classList.remove('is-visible');
+      feedback.classList.toggle('is-correct', isCorrect);
+      feedback.classList.toggle('is-wrong', !isCorrect);
+      feedback.querySelector('strong').textContent = isCorrect ? 'Верно' : 'Неверно';
+      feedback.querySelector('p').textContent = isCorrect ? 'Ответ засчитан. Проверь формулировку: ' + item.answer : 'Правильный вариант: ' + item.answer;
+      feedback.hidden = false;
+      renderTopicRail();
+      updateStats();
+      if (onlyReview && isCorrect) renderQuestions();
+    }
+
+    function clearCard(card) {
+      const id = card.dataset.id;
+      delete progress[id];
+      saveJson(storageKey, progress);
+      renderQuestions();
+      renderTopicRail();
+    }
+
+    topicSelect.addEventListener('change', function() {
+      currentTopicId = topicSelect.value;
+      renderTopicRail();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    topicRail.addEventListener('click', function(event) {
+      const button = event.target.closest('[data-topic-id]');
+      if (!button) return;
+      currentTopicId = button.dataset.topicId;
+      topicSelect.value = currentTopicId;
+      renderTopicRail();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    questionsPane.addEventListener('click', function(event) {
+      const option = event.target.closest('[data-action="select"]');
+      if (option) {
+        selectOption(option.closest('.test-card'), option);
+        return;
+      }
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const card = button.closest('.test-card');
+      if (button.dataset.action === 'check') checkCard(card);
+      if (button.dataset.action === 'clear') clearCard(card);
+    });
+    shuffleButton.addEventListener('click', function() {
+      shuffled = !shuffled;
+      shuffleSeed += 1;
+      renderQuestions();
+    });
+    reviewButton.addEventListener('click', function() {
+      onlyReview = !onlyReview;
+      renderQuestions();
+    });
+    document.querySelector('#resetProgress').addEventListener('click', function() {
+      if (!confirm('Сбросить прогресс тестов?')) return;
+      progress = {};
+      saveJson(storageKey, progress);
+      renderTopicRail();
+      renderQuestions();
+    });
+    document.querySelector('#closeWindow').addEventListener('click', function() {
+      window.close();
+    });
+    renderTopicSelect();
+    renderTopicRail();
+    renderQuestions();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    document.querySelector('#expandAll').addEventListener('click', () => {
+      topics.forEach((topic) => topic.querySelector('details').open = true);
+    });
+
+    document.querySelector('#collapseAll').addEventListener('click', () => {
+      topics.forEach((topic) => topic.querySelector('details').open = false);
+    });
+
+    resetChecks.addEventListener('click', () => {
+      checkedQuestions.clear();
+      allQuestions.forEach((question) => {
+        const checkbox = question.querySelector('.question-check');
+        if (checkbox) checkbox.checked = false;
+        question.classList.remove('is-done');
+      });
+      saveSet(storageKey, checkedQuestions);
+      updateChecklistProgress();
+    });
+
+    openTestsButton.addEventListener('click', () => openTestWindow('all'));
+    openFavoriteTestsButton.addEventListener('click', openFavoriteTestWindow);
+    searchInput.addEventListener('input', applySearch);
+    initializeChecklist();
+    initializeTopicTests();
+    applySearch();
+</script>
+
+</body>
+</html>

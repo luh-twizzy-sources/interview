@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">CAS в Java: механизм compare-and-swap</title>
+  <desc id="desc">Учебная схема показывает, как поток вызывает compareAndSet с expected и update, CPU атомарно сравнивает текущее значение в памяти и либо записывает новое значение, либо возвращает false для повторной попытки.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { fill: #0f172a; font: 700 44px Arial, sans-serif; letter-spacing: 0; }
+      .subtitle { fill: #475569; font: 400 22px Arial, sans-serif; letter-spacing: 0; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; filter: url(#soft-shadow); }
+      .panel-title { fill: #0f172a; font: 700 26px Arial, sans-serif; letter-spacing: 0; }
+      .panel-subtitle { fill: #475569; font: 400 18px Arial, sans-serif; letter-spacing: 0; }
+      .text { fill: #334155; font: 400 20px Arial, sans-serif; letter-spacing: 0; }
+      .small { fill: #475569; font: 400 17px Arial, sans-serif; letter-spacing: 0; }
+      .tiny { fill: #64748b; font: 400 15px Arial, sans-serif; letter-spacing: 0; }
+      .code { fill: #e2e8f0; font: 500 18px "JetBrains Mono", Consolas, monospace; letter-spacing: 0; }
+      .code-panel { fill: #111827; stroke: #334155; stroke-width: 2; }
+      .badge { fill: #e0f2fe; stroke: #38bdf8; stroke-width: 1.5; }
+      .badge-text { fill: #0369a1; font: 700 17px Arial, sans-serif; letter-spacing: 0; }
+      .memory { fill: #fff7ed; stroke: #fb923c; stroke-width: 2.5; }
+      .memory-value { fill: #9a3412; font: 700 38px Arial, sans-serif; letter-spacing: 0; }
+      .decision { fill: #fefce8; stroke: #eab308; stroke-width: 2.5; }
+      .success { fill: #ecfdf5; stroke: #22c55e; stroke-width: 2.5; }
+      .fail { fill: #fef2f2; stroke: #ef4444; stroke-width: 2.5; }
+      .line-blue { fill: none; stroke: #2563eb; stroke-width: 4; marker-end: url(#arrow-blue); }
+      .line-green { fill: none; stroke: #16a34a; stroke-width: 4; marker-end: url(#arrow-green); }
+      .line-red { fill: none; stroke: #dc2626; stroke-width: 4; marker-end: url(#arrow-red); }
+      .line-gray { fill: none; stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 9 9; }
+      .callout { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="1000"/>
+
+  <text x="80" y="72" class="title">CAS в Java: compare-and-swap</text>
+  <text x="80" y="112" class="subtitle">compareAndSet(expected, update): атомарно сравнить текущее значение и заменить его, если оно не изменилось</text>
+
+  <rect x="70" y="160" width="420" height="650" rx="8" class="panel"/>
+  <text x="105" y="212" class="panel-title">1. Поток готовит изменение</text>
+  <text x="105" y="246" class="panel-subtitle">Оптимистично: читаем, считаем, пробуем записать</text>
+
+  <rect x="105" y="285" width="350" height="210" rx="8" class="code-panel"/>
+  <text x="130" y="328" class="code">do {</text>
+  <text x="154" y="366" class="code">old = atomic.get();</text>
+  <text x="154" y="404" class="code">next = old + 1;</text>
+  <text x="130" y="442" class="code">} while (</text>
+  <text x="154" y="480" class="code">!atomic.compareAndSet(old, next)</text>
+  <text x="130" y="518" class="code">);</text>
+
+  <rect x="105" y="545" width="350" height="86" rx="8" class="badge"/>
+  <text x="130" y="579" class="badge-text">expected = old</text>
+  <text x="130" y="607" class="badge-text">update = next</text>
+
+  <rect x="105" y="665" width="350" height="95" rx="8" class="callout"/>
+  <text x="130" y="702" class="text">Если CAS вернул false,</text>
+  <text x="130" y="732" class="text">цикл перечитывает значение</text>
+
+  <rect x="590" y="160" width="420" height="650" rx="8" class="panel"/>
+  <text x="625" y="212" class="panel-title">2. JVM передает CAS вниз</text>
+  <text x="625" y="246" class="panel-subtitle">AtomicInteger, VarHandle или Unsafe</text>
+
+  <rect x="635" y="292" width="330" height="118" rx="8" class="callout"/>
+  <text x="665" y="337" class="text">compareAndSet(</text>
+  <text x="690" y="369" class="text">expected, update</text>
+  <text x="665" y="401" class="text">)</text>
+
+  <rect x="660" y="475" width="280" height="150" rx="8" class="decision"/>
+  <text x="700" y="530" class="panel-title">current ==</text>
+  <text x="698" y="574" class="panel-title">expected ?</text>
+  <text x="707" y="610" class="small">сравнение и запись</text>
+  <text x="732" y="634" class="small">неделимы</text>
+
+  <rect x="635" y="690" width="330" height="70" rx="8" class="callout"/>
+  <text x="665" y="734" class="text">Возврат: true или false</text>
+
+  <rect x="1110" y="160" width="420" height="650" rx="8" class="panel"/>
+  <text x="1145" y="212" class="panel-title">3. CPU работает с памятью</text>
+  <text x="1145" y="246" class="panel-subtitle">Одна атомарная машинная операция</text>
+
+  <rect x="1165" y="300" width="310" height="150" rx="8" class="memory"/>
+  <text x="1210" y="345" class="small">volatile-поле внутри AtomicInteger</text>
+  <text x="1232" y="406" class="memory-value">value = 10</text>
+
+  <rect x="1145" y="515" width="350" height="92" rx="8" class="success"/>
+  <text x="1174" y="552" class="text">Успех: current = expected</text>
+  <text x="1174" y="582" class="text">записать update и вернуть true</text>
+
+  <rect x="1145" y="665" width="350" height="92" rx="8" class="fail"/>
+  <text x="1174" y="702" class="text">Неудача: current изменился</text>
+  <text x="1174" y="732" class="text">не писать и вернуть false</text>
+
+  <path d="M 455 586 C 520 586, 555 350, 635 350" class="line-blue"/>
+  <text x="493" y="327" class="small">expected/update</text>
+
+  <path d="M 965 550 C 1030 550, 1075 375, 1165 375" class="line-blue"/>
+  <text x="1003" y="350" class="small">прочитать current</text>
+
+  <path d="M 940 545 C 1035 545, 1070 560, 1145 560" class="line-green"/>
+  <text x="996" y="531" class="small">да</text>
+
+  <path d="M 1320 515 C 1320 485, 1320 482, 1320 450" class="line-green"/>
+  <text x="1342" y="489" class="small">value = update</text>
+
+  <path d="M 800 625 C 800 675, 930 710, 1145 710" class="line-red"/>
+  <text x="928" y="681" class="small">нет</text>
+
+  <path d="M 1145 730 C 970 855, 500 860, 285 760" class="line-red"/>
+  <text x="680" y="894" class="small">retry: заново прочитать old и пересчитать next</text>
+
+  <path d="M 1320 450 C 1320 482, 1320 485, 1320 515" class="line-gray"/>
+
+  <rect x="80" y="855" width="450" height="88" rx="8" class="success"/>
+  <text x="110" y="891" class="panel-title">Почему это lock-free</text>
+  <text x="110" y="924" class="text">Нет synchronized-монитора; поток не блокируется, а повторяет попытку.</text>
+
+  <rect x="575" y="855" width="450" height="88" rx="8" class="callout"/>
+  <text x="605" y="891" class="panel-title">Память и видимость</text>
+  <text x="605" y="924" class="text">CAS у atomic-классов имеет volatile-подобные гарантии видимости.</text>
+
+  <rect x="1070" y="855" width="450" height="88" rx="8" class="fail"/>
+  <text x="1100" y="891" class="panel-title">Важный нюанс: ABA</text>
+  <text x="1100" y="924" class="text">A стало B, затем снова A. Помогают версии или AtomicStampedReference.</text>
+</svg>

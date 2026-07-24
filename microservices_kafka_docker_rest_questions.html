@@ -1,0 +1,1930 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF: микросервисы, Kafka, Docker/Kubernetes и REST</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --soft: #eef2f6;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0) 360px),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      padding: 28px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-main {
+      display: grid;
+      gap: 14px;
+      max-width: 820px;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      padding: 5px 10px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #2f3a4a;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 760px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 720px;
+    }
+
+    .stat {
+      min-height: 82px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+      gap: 10px;
+      align-items: center;
+      margin: 18px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .search {
+      min-width: 0;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .search:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.22);
+      border-color: #2563eb;
+    }
+
+    .button {
+      height: 42px;
+      padding: 0 13px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .button:hover { border-color: #94a3b8; background: #f8fafc; }
+
+    .button:disabled,
+    .button:disabled:hover {
+      border-color: var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.64;
+    }
+
+    .topic-test-button {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 58%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 94%);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .topic-test-button:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .topic-test-button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .visible-counter,
+    .check-counter,
+    .favorite-counter {
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .visible-counter { grid-column: 1; }
+
+    .check-counter {
+      grid-column: 2 / span 2;
+      justify-self: start;
+    }
+
+    .favorite-counter {
+      grid-column: 5;
+      justify-self: end;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0 26px;
+    }
+
+    .nav-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 2px 10px;
+      min-height: 78px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--strong-line);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .nav-index {
+      grid-row: span 2;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .nav-title {
+      display: -webkit-box;
+      min-height: 2.4em;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .nav-meta {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topic {
+      scroll-margin-top: 86px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    details { display: block; }
+
+    summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 82px;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    details[open] summary::after { content: "-"; }
+
+    .topic-marker {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-weight: 850;
+    }
+
+    .topic-heading {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .topic-kicker {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .topic-title {
+      overflow-wrap: anywhere;
+      font-size: 1.25rem;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .topic-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 42px;
+      white-space: nowrap;
+    }
+
+    .difficulty,
+    .section-count {
+      padding: 5px 9px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .difficulty {
+      background: color-mix(in srgb, var(--accent), white 88%);
+      color: var(--accent);
+    }
+
+    .section-count {
+      background: var(--soft);
+      color: #334155;
+    }
+
+    .topic-content {
+      border-top: 1px solid var(--line);
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    }
+
+    .topic-summary {
+      margin: 0 0 14px;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .questions {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: question;
+    }
+
+    .question {
+      counter-increment: question;
+      display: grid;
+      grid-template-columns: 34px 62px minmax(0, 1fr) 82px 38px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+
+    .question::before {
+      content: counter(question);
+      display: none;
+    }
+
+    .question.is-done {
+      border-color: color-mix(in srgb, var(--accent), white 68%);
+      background: color-mix(in srgb, var(--accent), white 94%);
+    }
+
+    .question.is-done .question-text {
+      color: #64748b;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: color-mix(in srgb, var(--accent), white 30%);
+    }
+
+    .question.is-favorite {
+      box-shadow: inset -4px 0 0 #f59e0b;
+    }
+
+    .check-wrap {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+    }
+
+    .question-check {
+      appearance: none;
+      position: relative;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      border: 2px solid var(--strong-line);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .question-check:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 88%);
+    }
+
+    .question-check:checked {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .question-check:checked::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 11px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .question-check:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 3px 7px;
+      border-radius: 8px;
+      background: var(--soft);
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .question-text {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      align-self: center;
+    }
+
+    .answer-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      justify-self: end;
+      width: 76px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 58%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 94%);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .answer-toggle:hover,
+    .answer-toggle[aria-expanded="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .answer-toggle:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent), transparent 74%);
+      outline-offset: 2px;
+    }
+
+    .answer-panel {
+      grid-column: 3 / -1;
+      display: block;
+      padding: 12px 14px;
+      border: 1px solid color-mix(in srgb, var(--accent), white 74%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 96%);
+      color: #334155;
+      font-size: 0.94rem;
+      line-height: 1.52;
+      overflow-wrap: anywhere;
+    }
+
+
+    .favorite-toggle {
+      display: grid;
+      place-items: center;
+      justify-self: end;
+      width: 32px;
+      height: 32px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      font: inherit;
+      font-size: 1.35rem;
+      line-height: 1;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .favorite-toggle::before {
+      content: "☆";
+    }
+
+    .favorite-toggle:hover {
+      border-color: #facc15;
+      background: #fef9c3;
+      color: #ca8a04;
+    }
+
+    .favorite-toggle:focus-visible {
+      outline: 3px solid rgba(245, 158, 11, 0.26);
+      outline-offset: 2px;
+    }
+
+    .question.is-favorite .favorite-toggle {
+      color: #f59e0b;
+    }
+
+    .question.is-favorite .favorite-toggle::before {
+      content: "★";
+    }
+
+    .empty-state {
+      display: none;
+      padding: 20px;
+      border: 1px dashed var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state.is-visible { display: block; }
+
+    .favorite-test-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-top: 28px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-left: 5px solid #f59e0b;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .favorite-test-kicker {
+      display: block;
+      color: #b45309;
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .favorite-test-panel h2 {
+      margin: 4px 0 0;
+      color: var(--ink);
+      font-size: 1.15rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .favorite-test-button {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .favorite-test-button:hover:not(:disabled) {
+      border-color: #d97706;
+      background: #f59e0b;
+      color: #fff;
+    }
+
+    footer {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 920px) {
+      .stats { grid-template-columns: 1fr; }
+      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .search, .visible-counter, .check-counter, .favorite-counter { grid-column: 1 / -1; }
+      .visible-counter { order: 4; }
+      .check-counter { order: 5; justify-self: start; }
+      .favorite-counter { order: 6; justify-self: start; }
+      summary { grid-template-columns: auto minmax(0, 1fr); }
+      summary::after { grid-column: 1 / -1; width: 100%; }
+      .topic-side { grid-column: 1 / -1; margin-right: 0; flex-wrap: wrap; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 20px, 1120px); padding-top: 18px; }
+      h1 { font-size: 1.75rem; }
+      .toolbar { position: static; grid-template-columns: 1fr; }
+      .nav-grid { grid-template-columns: 1fr; }
+      .button { width: 100%; }
+      .question { grid-template-columns: 34px minmax(0, 1fr) 76px 38px; gap: 7px 10px; align-items: start; }
+      .check-wrap { grid-row: 1 / span 3; }
+      .question-number { grid-column: 2; width: fit-content; }
+      .question-text { grid-column: 2 / -1; grid-row: 2; }
+      .answer-toggle { grid-column: 3; grid-row: 1; width: 70px; }
+      .answer-panel { grid-column: 2 / -1; }
+      .favorite-toggle { grid-column: 4; grid-row: 1; align-self: center; }
+      .favorite-test-panel { grid-template-columns: 1fr; }
+      .favorite-test-button { width: 100%; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 12px; }
+      .page { width: 100%; padding: 0; }
+      .toolbar, .nav-grid, .answer-toggle, .topic-test-button, .favorite-test-panel { display: none; }
+      .hero { padding-top: 0; }
+      .topic { box-shadow: none; break-inside: avoid; }
+      details { display: block; }
+      details:not([open]) .topic-content { display: block; }
+      summary::after { display: none; }
+      .question { break-inside: avoid; }
+    }
+</style>
+</head>
+<body data-total-questions="89">
+  <main class="page">
+    <header class="hero">
+      <div class="hero-main">
+        <span class="eyebrow">PDF Remaining Interview</span>
+        <h1>Микросервисы, Kafka, Docker/Kubernetes и REST: вопросы из PDF</h1>
+        <p class="lead">Вопросы взяты из файла Вопросы_для_собеседования_Java.pdf. Это оставшиеся непокрытые темы после Java Core, Hibernate/JPA/БД и Spring.</p>
+      </div>
+      <div class="stats" aria-label="Сводка">
+        <div class="stat"><strong>89</strong><span>вопросов из PDF</span></div>
+        <div class="stat"><strong>4</strong><span>темы</span></div>
+        <div class="stat"><strong>#82-392</strong><span>исходные номера</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar" aria-label="Управление списком">
+      <input id="search" class="search" type="search" placeholder="Поиск по вопросам" autocomplete="off">
+      <button id="expandAll" class="button" type="button">Раскрыть все</button>
+      <button id="collapseAll" class="button" type="button">Свернуть все</button>
+      <button id="resetChecks" class="button" type="button">Сбросить чеклист</button>
+      <button id="openTests" class="button" type="button">Открыть тесты</button>
+      <span class="visible-counter">Показано: <strong id="visibleCount">89 из 89</strong></span>
+      <span class="check-counter">Отмечено: <strong id="checkedCount">0 из 89</strong></span>
+      <span class="favorite-counter">Понравилось: <strong id="favoriteCount">0 из 89</strong></span>
+    </div>
+
+    <nav class="nav-grid" aria-label="Оставшиеся темы из PDF">
+      
+        <a class="nav-card" href="#topic-01" style="--accent: #2563eb;">
+          <span class="nav-index">01</span>
+          <span class="nav-title">Микросервисы</span>
+          <span class="nav-meta">1. Средний · 18 вопросов</span>
+        </a>
+        <a class="nav-card" href="#topic-02" style="--accent: #dc2626;">
+          <span class="nav-index">02</span>
+          <span class="nav-title">Kafka</span>
+          <span class="nav-meta">2. Средний+ · 30 вопросов</span>
+        </a>
+        <a class="nav-card" href="#topic-03" style="--accent: #16a34a;">
+          <span class="nav-index">03</span>
+          <span class="nav-title">Docker / Kubernetes</span>
+          <span class="nav-meta">3. Продвинутый · 24 вопроса</span>
+        </a>
+        <a class="nav-card" href="#topic-04" style="--accent: #f97316;">
+          <span class="nav-index">04</span>
+          <span class="nav-title">REST / HTTP</span>
+          <span class="nav-meta">4. Средний+ · 17 вопросов</span>
+        </a>
+    </nav>
+
+    <div id="emptyState" class="empty-state">По этому запросу вопросов не найдено.</div>
+
+    <div class="topic-list">
+      
+      <section class="topic" id="topic-01" data-total="18" style="--accent: #2563eb;">
+        <details open>
+          <summary>
+            <span class="topic-marker">01</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 17</span>
+              <span class="topic-title">Микросервисы</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">1. Средний</span>
+              <span class="section-count">18 вопросов</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Оставшиеся вопросы #82-86, #89, #92-103 из PDF: resilience, discovery, gateway, коммуникация, observability, auth и orchestration.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое паттерн Circuit Breaker?">
+              <span class="question-number">#82</span>
+              <span class="question-text">Что такое паттерн Circuit Breaker?</span>
+            </li><li class="question" data-text="Как работает Circuit Breaker и какие у него состояния?">
+              <span class="question-number">#83</span>
+              <span class="question-text">Как работает Circuit Breaker и какие у него состояния?</span>
+            </li><li class="question" data-text="Что такое Service Discovery и зачем он нужен?">
+              <span class="question-number">#84</span>
+              <span class="question-text">Что такое Service Discovery и зачем он нужен?</span>
+            </li><li class="question" data-text="В чём разница между client-side и server-side discovery?">
+              <span class="question-number">#85</span>
+              <span class="question-text">В чём разница между client-side и server-side discovery?</span>
+            </li><li class="question" data-text="Что такое API Gateway и какие задачи он решает?">
+              <span class="question-number">#86</span>
+              <span class="question-text">Что такое API Gateway и какие задачи он решает?</span>
+            </li><li class="question" data-text="Как реализовать горизонтальное масштабирование микросервисов?">
+              <span class="question-number">#89</span>
+              <span class="question-text">Как реализовать горизонтальное масштабирование микросервисов?</span>
+            </li><li class="question" data-text="Как организовать коммуникацию между микросервисами?">
+              <span class="question-number">#92</span>
+              <span class="question-text">Как организовать коммуникацию между микросервисами?</span>
+            </li><li class="question" data-text="В чём разница между синхронной и асинхронной коммуникацией?">
+              <span class="question-number">#93</span>
+              <span class="question-text">В чём разница между синхронной и асинхронной коммуникацией?</span>
+            </li><li class="question" data-text="Как обеспечить отказоустойчивость микросервисов?">
+              <span class="question-number">#94</span>
+              <span class="question-text">Как обеспечить отказоустойчивость микросервисов?</span>
+            </li><li class="question" data-text="Что такое паттерн Bulkhead?">
+              <span class="question-number">#95</span>
+              <span class="question-text">Что такое паттерн Bulkhead?</span>
+            </li><li class="question" data-text="Что такое паттерн Retry и как его правильно использовать?">
+              <span class="question-number">#96</span>
+              <span class="question-text">Что такое паттерн Retry и как его правильно использовать?</span>
+            </li><li class="question" data-text="Что такое exponential backoff?">
+              <span class="question-number">#97</span>
+              <span class="question-text">Что такое exponential backoff?</span>
+            </li><li class="question" data-text="Как мониторить распределённую систему микросервисов?">
+              <span class="question-number">#98</span>
+              <span class="question-text">Как мониторить распределённую систему микросервисов?</span>
+            </li><li class="question" data-text="Что такое distributed tracing?">
+              <span class="question-number">#99</span>
+              <span class="question-text">Что такое distributed tracing?</span>
+            </li><li class="question" data-text="Как реализовать аутентификацию и авторизацию в микросервисах?">
+              <span class="question-number">#100</span>
+              <span class="question-text">Как реализовать аутентификацию и авторизацию в микросервисах?</span>
+            </li><li class="question" data-text="Что такое паттерн Strangler Fig?">
+              <span class="question-number">#101</span>
+              <span class="question-text">Что такое паттерн Strangler Fig?</span>
+            </li><li class="question" data-text="Как тестировать микросервисы?">
+              <span class="question-number">#102</span>
+              <span class="question-text">Как тестировать микросервисы?</span>
+            </li><li class="question" data-text="Какие инструменты используются для оркестрации микросервисов?">
+              <span class="question-number">#103</span>
+              <span class="question-text">Какие инструменты используются для оркестрации микросервисов?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-02" data-total="30" style="--accent: #dc2626;">
+        <details open>
+          <summary>
+            <span class="topic-marker">02</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 15</span>
+              <span class="topic-title">Kafka</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">2. Средний+</span>
+              <span class="section-count">30 вопросов</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #134-163 из PDF: topics, partitions, consumer groups, delivery guarantees, offsets, replication, producer settings, DLQ, lag и retention.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое топик (topic) в Kafka?">
+              <span class="question-number">#134</span>
+              <span class="question-text">Что такое топик (topic) в Kafka?</span>
+            </li><li class="question" data-text="Что такое партиция (partition) и зачем она нужна?">
+              <span class="question-number">#135</span>
+              <span class="question-text">Что такое партиция (partition) и зачем она нужна?</span>
+            </li><li class="question" data-text="Как данные распределяются по партициям?">
+              <span class="question-number">#136</span>
+              <span class="question-text">Как данные распределяются по партициям?</span>
+            </li><li class="question" data-text="Что такое ключ сообщения и как он влияет на партиционирование?">
+              <span class="question-number">#137</span>
+              <span class="question-text">Что такое ключ сообщения и как он влияет на партиционирование?</span>
+            </li><li class="question" data-text="Что такое Consumer Group?">
+              <span class="question-number">#138</span>
+              <span class="question-text">Что такое Consumer Group?</span>
+            </li><li class="question" data-text="Как работает балансировка консьюмеров в группе?">
+              <span class="question-number">#139</span>
+              <span class="question-text">Как работает балансировка консьюмеров в группе?</span>
+            </li><li class="question" data-text="Можно ли иметь больше консьюмеров, чем партиций?">
+              <span class="question-number">#140</span>
+              <span class="question-text">Можно ли иметь больше консьюмеров, чем партиций?</span>
+            </li><li class="question" data-text="Что произойдёт при добавлении нового консьюмера в группу?">
+              <span class="question-number">#141</span>
+              <span class="question-text">Что произойдёт при добавлении нового консьюмера в группу?</span>
+            </li><li class="question" data-text="Какие гарантии доставки сообщений предоставляет Kafka?">
+              <span class="question-number">#142</span>
+              <span class="question-text">Какие гарантии доставки сообщений предоставляет Kafka?</span>
+            </li><li class="question" data-text="В чём разница между at-most-once, at-least-once и exactly-once?">
+              <span class="question-number">#143</span>
+              <span class="question-text">В чём разница между at-most-once, at-least-once и exactly-once?</span>
+            </li><li class="question" data-text="Как настроить exactly-once семантику?">
+              <span class="question-number">#144</span>
+              <span class="question-text">Как настроить exactly-once семантику?</span>
+            </li><li class="question" data-text="Что такое offset в Kafka?">
+              <span class="question-number">#145</span>
+              <span class="question-text">Что такое offset в Kafka?</span>
+            </li><li class="question" data-text="Как работает commit offset?">
+              <span class="question-number">#146</span>
+              <span class="question-text">Как работает commit offset?</span>
+            </li><li class="question" data-text="В чём разница между auto commit и manual commit?">
+              <span class="question-number">#147</span>
+              <span class="question-text">В чём разница между auto commit и manual commit?</span>
+            </li><li class="question" data-text="Что такое rebalancing и когда он происходит?">
+              <span class="question-number">#148</span>
+              <span class="question-text">Что такое rebalancing и когда он происходит?</span>
+            </li><li class="question" data-text="Что такое репликация в Kafka?">
+              <span class="question-number">#149</span>
+              <span class="question-text">Что такое репликация в Kafka?</span>
+            </li><li class="question" data-text="Что такое leader и follower реплики?">
+              <span class="question-number">#150</span>
+              <span class="question-text">Что такое leader и follower реплики?</span>
+            </li><li class="question" data-text="Что такое ISR (In-Sync Replicas)?">
+              <span class="question-number">#151</span>
+              <span class="question-text">Что такое ISR (In-Sync Replicas)?</span>
+            </li><li class="question" data-text="Как Kafka обеспечивает отказоустойчивость?">
+              <span class="question-number">#152</span>
+              <span class="question-text">Как Kafka обеспечивает отказоустойчивость?</span>
+            </li><li class="question" data-text="Что такое producer acknowledgment и какие режимы существуют (acks=0,1,all)?">
+              <span class="question-number">#153</span>
+              <span class="question-text">Что такое producer acknowledgment и какие режимы существуют (acks=0,1,all)?</span>
+            </li><li class="question" data-text="Что такое batch в Kafka producer?">
+              <span class="question-number">#154</span>
+              <span class="question-text">Что такое batch в Kafka producer?</span>
+            </li><li class="question" data-text="Как работает компрессия сообщений?">
+              <span class="question-number">#155</span>
+              <span class="question-text">Как работает компрессия сообщений?</span>
+            </li><li class="question" data-text="Что такое idempotent producer?">
+              <span class="question-number">#156</span>
+              <span class="question-text">Что такое idempotent producer?</span>
+            </li><li class="question" data-text="Как обрабатывать ошибки при чтении сообщений?">
+              <span class="question-number">#157</span>
+              <span class="question-text">Как обрабатывать ошибки при чтении сообщений?</span>
+            </li><li class="question" data-text="Что такое DLQ (Dead Letter Queue)?">
+              <span class="question-number">#158</span>
+              <span class="question-text">Что такое DLQ (Dead Letter Queue)?</span>
+            </li><li class="question" data-text="Как мониторить lag консьюмера?">
+              <span class="question-number">#159</span>
+              <span class="question-text">Как мониторить lag консьюмера?</span>
+            </li><li class="question" data-text="Что такое retention policy?">
+              <span class="question-number">#160</span>
+              <span class="question-text">Что такое retention policy?</span>
+            </li><li class="question" data-text="Как удаляются старые сообщения из топика?">
+              <span class="question-number">#161</span>
+              <span class="question-text">Как удаляются старые сообщения из топика?</span>
+            </li><li class="question" data-text="Можно ли читать сообщения из определённой партиции?">
+              <span class="question-number">#162</span>
+              <span class="question-text">Можно ли читать сообщения из определённой партиции?</span>
+            </li><li class="question" data-text="Как реализовать фильтрацию сообщений на стороне консьюмера?">
+              <span class="question-number">#163</span>
+              <span class="question-text">Как реализовать фильтрацию сообщений на стороне консьюмера?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-03" data-total="24" style="--accent: #16a34a;">
+        <details open>
+          <summary>
+            <span class="topic-marker">03</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 14</span>
+              <span class="topic-title">Docker / Kubernetes</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">3. Продвинутый</span>
+              <span class="section-count">24 вопроса</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #164-187 из PDF: контейнеры, Dockerfile, Compose, Kubernetes objects, services, probes, ingress, rolling update, StatefulSet и monitoring.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое контейнеризация и зачем она нужна?">
+              <span class="question-number">#164</span>
+              <span class="question-text">Что такое контейнеризация и зачем она нужна?</span>
+            </li><li class="question" data-text="В чём отличие контейнера от виртуальной машины?">
+              <span class="question-number">#165</span>
+              <span class="question-text">В чём отличие контейнера от виртуальной машины?</span>
+            </li><li class="question" data-text="Что такое Dockerfile?">
+              <span class="question-number">#166</span>
+              <span class="question-text">Что такое Dockerfile?</span>
+            </li><li class="question" data-text="Какие основные инструкции используются в Dockerfile?">
+              <span class="question-number">#167</span>
+              <span class="question-text">Какие основные инструкции используются в Dockerfile?</span>
+            </li><li class="question" data-text="В чём разница между CMD и ENTRYPOINT?">
+              <span class="question-number">#168</span>
+              <span class="question-text">В чём разница между CMD и ENTRYPOINT?</span>
+            </li><li class="question" data-text="Что такое multi-stage build?">
+              <span class="question-number">#169</span>
+              <span class="question-text">Что такое multi-stage build?</span>
+            </li><li class="question" data-text="Что такое Docker Compose?">
+              <span class="question-number">#170</span>
+              <span class="question-text">Что такое Docker Compose?</span>
+            </li><li class="question" data-text="Что такое Kubernetes и зачем он нужен?">
+              <span class="question-number">#171</span>
+              <span class="question-text">Что такое Kubernetes и зачем он нужен?</span>
+            </li><li class="question" data-text="Что такое Pod в Kubernetes?">
+              <span class="question-number">#172</span>
+              <span class="question-text">Что такое Pod в Kubernetes?</span>
+            </li><li class="question" data-text="Что такое Node в Kubernetes?">
+              <span class="question-number">#173</span>
+              <span class="question-text">Что такое Node в Kubernetes?</span>
+            </li><li class="question" data-text="Что такое Service в Kubernetes?">
+              <span class="question-number">#174</span>
+              <span class="question-text">Что такое Service в Kubernetes?</span>
+            </li><li class="question" data-text="Какие типы Service существуют (ClusterIP, NodePort, LoadBalancer)?">
+              <span class="question-number">#175</span>
+              <span class="question-text">Какие типы Service существуют (ClusterIP, NodePort, LoadBalancer)?</span>
+            </li><li class="question" data-text="Что такое ReplicaSet?">
+              <span class="question-number">#176</span>
+              <span class="question-text">Что такое ReplicaSet?</span>
+            </li><li class="question" data-text="Как происходит масштабирование в Kubernetes?">
+              <span class="question-number">#177</span>
+              <span class="question-text">Как происходит масштабирование в Kubernetes?</span>
+            </li><li class="question" data-text="Что такое HorizontalPodAutoscaler?">
+              <span class="question-number">#178</span>
+              <span class="question-text">Что такое HorizontalPodAutoscaler?</span>
+            </li><li class="question" data-text="В чём разница между ConfigMap и Secret?">
+              <span class="question-number">#179</span>
+              <span class="question-text">В чём разница между ConfigMap и Secret?</span>
+            </li><li class="question" data-text="Что такое liveness probe?">
+              <span class="question-number">#180</span>
+              <span class="question-text">Что такое liveness probe?</span>
+            </li><li class="question" data-text="Что такое readiness probe?">
+              <span class="question-number">#181</span>
+              <span class="question-text">Что такое readiness probe?</span>
+            </li><li class="question" data-text="Зачем нужны health checks?">
+              <span class="question-number">#182</span>
+              <span class="question-text">Зачем нужны health checks?</span>
+            </li><li class="question" data-text="Что такое Ingress в Kubernetes?">
+              <span class="question-number">#183</span>
+              <span class="question-text">Что такое Ingress в Kubernetes?</span>
+            </li><li class="question" data-text="Что такое namespace?">
+              <span class="question-number">#184</span>
+              <span class="question-text">Что такое namespace?</span>
+            </li><li class="question" data-text="Как организовать rolling update в Kubernetes?">
+              <span class="question-number">#185</span>
+              <span class="question-text">Как организовать rolling update в Kubernetes?</span>
+            </li><li class="question" data-text="Что такое StatefulSet и когда его использовать?">
+              <span class="question-number">#186</span>
+              <span class="question-text">Что такое StatefulSet и когда его использовать?</span>
+            </li><li class="question" data-text="Как мониторить приложения в Kubernetes?">
+              <span class="question-number">#187</span>
+              <span class="question-text">Как мониторить приложения в Kubernetes?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+      <section class="topic" id="topic-04" data-total="17" style="--accent: #f97316;">
+        <details open>
+          <summary>
+            <span class="topic-marker">04</span>
+            <span class="topic-heading">
+              <span class="topic-kicker">PDF: тема 6</span>
+              <span class="topic-title">REST / HTTP</span>
+            </span>
+            <span class="topic-side">
+              <span class="difficulty">4. Средний+</span>
+              <span class="section-count">17 вопросов</span>
+            </span>
+          </summary>
+          <div class="topic-content">
+            <p class="topic-summary">Вопросы #376-392 из PDF: REST, stateless, HTTP methods, idempotency, status codes, API design, HATEOAS, versioning и headers.</p>
+            <ol class="questions">
+              <li class="question" data-text="Что такое REST?">
+              <span class="question-number">#376</span>
+              <span class="question-text">Что такое REST?</span>
+            </li><li class="question" data-text="Что означает Stateless в контексте REST?">
+              <span class="question-number">#377</span>
+              <span class="question-text">Что означает Stateless в контексте REST?</span>
+            </li><li class="question" data-text="Какие основные HTTP методы используются в REST?">
+              <span class="question-number">#378</span>
+              <span class="question-text">Какие основные HTTP методы используются в REST?</span>
+            </li><li class="question" data-text="В чём разница между PUT и PATCH?">
+              <span class="question-number">#379</span>
+              <span class="question-text">В чём разница между PUT и PATCH?</span>
+            </li><li class="question" data-text="Что такое идемпотентность (idempotency)?">
+              <span class="question-number">#380</span>
+              <span class="question-text">Что такое идемпотентность (idempotency)?</span>
+            </li><li class="question" data-text="Какие HTTP методы идемпотентны?">
+              <span class="question-number">#381</span>
+              <span class="question-text">Какие HTTP методы идемпотентны?</span>
+            </li><li class="question" data-text="Почему GET и DELETE идемпотентны?">
+              <span class="question-number">#382</span>
+              <span class="question-text">Почему GET и DELETE идемпотентны?</span>
+            </li><li class="question" data-text="Является ли POST идемпотентным?">
+              <span class="question-number">#383</span>
+              <span class="question-text">Является ли POST идемпотентным?</span>
+            </li><li class="question" data-text="Какие HTTP статус коды вы знаете?">
+              <span class="question-number">#384</span>
+              <span class="question-text">Какие HTTP статус коды вы знаете?</span>
+            </li><li class="question" data-text="В чём разница между 401 и 403?">
+              <span class="question-number">#385</span>
+              <span class="question-text">В чём разница между 401 и 403?</span>
+            </li><li class="question" data-text="Что такое RESTful API дизайн?">
+              <span class="question-number">#386</span>
+              <span class="question-text">Что такое RESTful API дизайн?</span>
+            </li><li class="question" data-text="Как правильно именовать REST endpoints?">
+              <span class="question-number">#387</span>
+              <span class="question-text">Как правильно именовать REST endpoints?</span>
+            </li><li class="question" data-text="Стоит ли использовать глаголы в URL?">
+              <span class="question-number">#388</span>
+              <span class="question-text">Стоит ли использовать глаголы в URL?</span>
+            </li><li class="question" data-text="Что такое HATEOAS?">
+              <span class="question-number">#389</span>
+              <span class="question-text">Что такое HATEOAS?</span>
+            </li><li class="question" data-text="Как организовать версионирование REST API?">
+              <span class="question-number">#390</span>
+              <span class="question-text">Как организовать версионирование REST API?</span>
+            </li><li class="question" data-text="Что такое Content-Type header?">
+              <span class="question-number">#391</span>
+              <span class="question-text">Что такое Content-Type header?</span>
+            </li><li class="question" data-text="Что такое Accept header?">
+              <span class="question-number">#392</span>
+              <span class="question-text">Что такое Accept header?</span>
+            </li>
+            </ol>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <section class="favorite-test-panel" aria-label="Тест по вопросам со звездочкой">
+      <div>
+        <span class="favorite-test-kicker">Тест по избранному</span>
+        <h2>Вопросы со звездочкой</h2>
+      </div>
+      <button id="openFavoriteTests" class="button favorite-test-button" type="button">Запустить тест · ★ <span id="favoriteTestCount">0</span></button>
+    </section>
+
+    <footer>
+      <a href="index.html">На главную</a> · Источник вопросов: Вопросы_для_собеседования_Java.pdf. Краткие ответы добавлены для работы кнопок “Ответ” и тестового режима.
+    </footer>
+  </main>
+
+  <script>
+    const searchInput = document.querySelector('#search');
+    const topics = Array.from(document.querySelectorAll('.topic'));
+    const allQuestions = Array.from(document.querySelectorAll('.question'));
+    const visibleCount = document.querySelector('#visibleCount');
+    const checkedCount = document.querySelector('#checkedCount');
+    const favoriteCount = document.querySelector('#favoriteCount');
+    const resetChecks = document.querySelector('#resetChecks');
+    const openTestsButton = document.querySelector('#openTests');
+    const openFavoriteTestsButton = document.querySelector('#openFavoriteTests');
+    const favoriteTestCount = document.querySelector('#favoriteTestCount');
+    const totalCount = Number(document.body.dataset.totalQuestions);
+    const emptyState = document.querySelector('#emptyState');
+    const storageKey = 'pdf-remaining-topics-checklist-v1';
+    const favoritesKey = 'pdf-remaining-topics-favorites-v1';
+    const answerTexts = {
+      "q-82": "Circuit Breaker защищает систему от постоянных вызовов к неисправному сервису. Он временно размыкает цепь после серии ошибок и дает сервису время восстановиться.",
+      "q-83": "Обычно состояния такие: closed - вызовы проходят, open - вызовы быстро отклоняются, half-open - пропускается ограниченное число пробных запросов. По результату проб Circuit Breaker закрывается или снова открывается.",
+      "q-84": "Service Discovery позволяет сервисам находить адреса друг друга динамически. Это нужно, потому что в распределенной системе экземпляры появляются, исчезают и меняют адреса.",
+      "q-85": "При client-side discovery клиент сам спрашивает registry и выбирает экземпляр сервиса. При server-side discovery клиент идет через балансировщик или gateway, а выбор экземпляра происходит на стороне инфраструктуры.",
+      "q-86": "API Gateway - входная точка для клиентов. Он маршрутизирует запросы, может выполнять authentication, rate limiting, aggregation, protocol translation, logging и скрывать внутреннюю топологию сервисов.",
+      "q-89": "Горизонтальное масштабирование достигается запуском нескольких stateless-экземпляров сервиса за балансировщиком. Важно вынести состояние во внешние хранилища, настроить autoscaling, health checks и observability.",
+      "q-92": "Коммуникацию организуют синхронно через HTTP/gRPC или асинхронно через брокер сообщений. Выбор зависит от требований к latency, consistency, связности и отказоустойчивости.",
+      "q-93": "Синхронная коммуникация ждет ответ сразу и проще для request-response сценариев, но сильнее связывает сервисы. Асинхронная работает через события или очереди, лучше переносит сбои, но сложнее в consistency и отладке.",
+      "q-94": "Используют timeouts, retries с backoff, Circuit Breaker, Bulkhead, rate limiting, health checks, graceful degradation, репликацию и мониторинг. Важно не допускать каскадных отказов.",
+      "q-95": "Bulkhead изолирует ресурсы между частями системы, например отдельные thread pools, connection pools или лимиты для разных интеграций. Сбой одного направления не должен забрать все ресурсы приложения.",
+      "q-96": "Retry повторяет временно неудачную операцию. Его нужно ограничивать числом попыток, использовать timeout, backoff и jitter, а также повторять только идемпотентные или безопасно обработанные операции.",
+      "q-97": "Exponential backoff увеличивает задержку между повторными попытками, например 100 ms, 200 ms, 400 ms. Обычно добавляют jitter, чтобы клиенты не повторяли запросы одновременно.",
+      "q-98": "Нужны метрики, логи, distributed tracing, health checks, dashboards и alerting. Важно связывать технические метрики с бизнес-операциями и SLO.",
+      "q-99": "Distributed tracing отслеживает путь запроса через несколько сервисов с помощью trace id и spans. Он помогает понять latency, ошибки и зависимости в распределенной системе.",
+      "q-100": "Часто используют OAuth2/OIDC, JWT или session/token exchange через gateway и identity provider. Authentication проверяет личность, authorization проверяет права на действие или ресурс.",
+      "q-101": "Strangler Fig постепенно заменяет legacy-систему новой, перехватывая часть функциональности через фасад, gateway или routing layer. Это снижает риск большого одномоментного переписывания.",
+      "q-102": "Используют unit, integration, contract tests, component tests, end-to-end tests для критичных потоков и тесты устойчивости. Contract testing помогает не ломать взаимодействия между сервисами.",
+      "q-103": "Чаще всего используют Kubernetes и связанные инструменты: Helm, operators, service mesh, ingress controllers и autoscaling. Для локальной разработки часто применяют Docker Compose.",
+      "q-134": "Topic - именованный поток сообщений в Kafka. Producer пишет сообщения в topic, consumer читает их из topic, а физически topic разбит на partitions.",
+      "q-135": "Partition - упорядоченный append-only log внутри topic. Партиции дают параллелизм, масштабирование и независимое хранение offset-ов.",
+      "q-136": "Если указан key, Kafka обычно хеширует key и выбирает partition, сохраняя порядок сообщений с одинаковым key внутри partition. Без key producer может распределять сообщения round-robin или sticky-стратегией.",
+      "q-137": "Key - значение, по которому producer выбирает partition. Одинаковый key обычно попадает в одну partition, что сохраняет порядок обработки для этого key.",
+      "q-138": "Consumer Group - группа consumer-ов, совместно читающих topic. Каждая partition внутри group назначается только одному consumer-у одновременно.",
+      "q-139": "Kafka назначает partitions consumer-ам внутри group. При изменении состава group или partitions происходит rebalance и partition assignment пересчитывается.",
+      "q-140": "Можно, но лишние consumer-ы будут простаивать, потому что одна partition в рамках group не может одновременно обрабатываться несколькими consumer-ами.",
+      "q-141": "Group coordinator запустит rebalance, partitions перераспределятся между consumer-ами. На время rebalance обработка может кратко остановиться или замедлиться.",
+      "q-142": "На уровне обработки обычно говорят об at-most-once, at-least-once и exactly-once. Реальная гарантия зависит от producer ack, idempotence, transactions, offset commit и идемпотентности consumer-логики.",
+      "q-143": "At-most-once допускает потерю, но не повтор. At-least-once не теряет при корректной настройке, но допускает дубли. Exactly-once стремится избежать и потерь, и дублей в поддерживаемых transactional-сценариях.",
+      "q-144": "Для Kafka producer включают idempotence и transactions, задают transactional.id и корректно коммитят offsets вместе с результатом обработки. На практике также нужна идемпотентная бизнес-логика и подходящий sink.",
+      "q-145": "Offset - позиция сообщения внутри partition. Consumer хранит committed offset, чтобы понимать, с какого места продолжать чтение.",
+      "q-146": "Consumer коммитит offset в Kafka, обычно в служебный topic __consumer_offsets. Commit означает, что group считает сообщения до этой позиции обработанными.",
+      "q-147": "Auto commit периодически сохраняет offsets автоматически, но может коммитить до завершения обработки. Manual commit дает контроль и обычно безопаснее для at-least-once обработки.",
+      "q-148": "Rebalancing - перераспределение partitions между consumer-ами group. Он происходит при добавлении или удалении consumer-а, изменении partitions, timeout-е heartbeat или изменении subscription.",
+      "q-149": "Репликация хранит копии partitions на нескольких brokers. Это повышает отказоустойчивость: при падении broker-а Kafka может выбрать другого leader-а из replica set.",
+      "q-150": "Leader replica обслуживает чтение и запись partition. Follower replicas копируют данные с leader-а и могут стать leader-ом при сбое.",
+      "q-151": "ISR - набор реплик, которые достаточно актуальны относительно leader-а. Настройки ack=all и min.insync.replicas используют ISR для надежной записи.",
+      "q-152": "Kafka использует replication, leader election, ISR, durable log, ack-настройки и consumer offset management. Отказоустойчивость зависит от replication factor и корректной конфигурации producer/cluster.",
+      "q-153": "acks=0 не ждет подтверждения broker-а, acks=1 ждет leader-а, acks=all ждет подтверждения от ISR согласно min.insync.replicas. Чем строже ack, тем выше надежность и обычно выше latency.",
+      "q-154": "Producer batch объединяет несколько сообщений для одной partition перед отправкой. Batching повышает throughput, а размер и задержку регулируют batch.size и linger.ms.",
+      "q-155": "Producer сжимает batches перед отправкой, broker хранит сжатые данные, consumer распаковывает при чтении. Частые codecs: gzip, snappy, lz4 и zstd.",
+      "q-156": "Idempotent producer предотвращает дубли при retry на уровне producer-broker для одной producer session. Он использует producer id и sequence numbers.",
+      "q-157": "Нужно различать временные и постоянные ошибки, использовать retry с backoff, DLQ для невалидных сообщений, идемпотентность обработки и ручной commit offset после успешной обработки.",
+      "q-158": "DLQ - topic или очередь для сообщений, которые не удалось обработать после допустимых попыток. Она позволяет не блокировать partition и отдельно разбирать проблемные события.",
+      "q-159": "Consumer lag - разница между последним offset в partition и committed/current offset consumer group. Его мониторят через Kafka metrics, exporter, Burrow, Prometheus/Grafana или tooling платформы.",
+      "q-160": "Retention policy задает, сколько Kafka хранит сообщения: по времени, размеру log или compacted key-семантике. Kafka хранит сообщения независимо от того, прочитали их consumer-ы или нет.",
+      "q-161": "Kafka удаляет старые log segments по retention.ms или retention.bytes. Для compacted topics старые значения по key могут заменяться последним значением или tombstone.",
+      "q-162": "Да, consumer может явно assign-ить конкретную partition вместо subscribe через group management. Также можно seek-нуть offset внутри partition.",
+      "q-163": "Consumer читает сообщения и отбрасывает ненужные по key, headers или payload. Но Kafka все равно доставит эти сообщения consumer-у; если фильтрация тяжелая, лучше проектировать отдельные topics или routing на producer side.",
+      "q-164": "Контейнеризация упаковывает приложение с зависимостями в изолированный процесс на общей ОС. Она упрощает воспроизводимый запуск, доставку и масштабирование приложений.",
+      "q-165": "VM запускает полноценную гостевую ОС поверх hypervisor. Контейнер использует ядро host OS и изолирует процессы через namespaces/cgroups, поэтому обычно легче и стартует быстрее.",
+      "q-166": "Dockerfile - инструкция для сборки Docker image. Он описывает base image, копирование файлов, установку зависимостей, команды сборки и команду запуска.",
+      "q-167": "Частые инструкции: FROM, WORKDIR, COPY, ADD, RUN, ENV, ARG, EXPOSE, CMD, ENTRYPOINT, USER и HEALTHCHECK. Их порядок влияет на build cache и размер image.",
+      "q-168": "ENTRYPOINT задает основную исполняемую команду контейнера. CMD задает аргументы по умолчанию или команду по умолчанию, которую проще переопределить при запуске.",
+      "q-169": "Multi-stage build использует несколько FROM-стадий в Dockerfile. Например, первая стадия собирает приложение, а финальная содержит только runtime и артефакт, уменьшая image.",
+      "q-170": "Docker Compose описывает набор контейнеров, сетей и volumes в YAML-файле. Он удобен для локальной разработки и простых стендов с несколькими сервисами.",
+      "q-171": "Kubernetes - платформа оркестрации контейнеров. Она управляет запуском, масштабированием, self-healing, сервисной сетью, конфигурацией и rolling updates.",
+      "q-172": "Pod - минимальная deployable-единица Kubernetes, содержащая один или несколько контейнеров с общей сетью и volumes. Обычно один pod содержит один основной контейнер приложения.",
+      "q-173": "Node - worker-машина кластера, физическая или виртуальная, на которой запускаются pods. Node управляется kubelet и предоставляет CPU, memory, storage и network ресурсы.",
+      "q-174": "Service дает стабильную сетевую точку доступа к набору pods, выбранных selector-ом. Он скрывает изменчивые IP pod-ов и выполняет load balancing внутри кластера.",
+      "q-175": "ClusterIP доступен внутри кластера, NodePort открывает порт на nodes, LoadBalancer создает внешний балансировщик у cloud provider. Еще есть ExternalName для DNS alias.",
+      "q-176": "ReplicaSet поддерживает заданное число одинаковых pod replicas. Обычно его не создают напрямую, а используют через Deployment.",
+      "q-177": "Масштабирование меняет число replicas у Deployment/ReplicaSet или другого workload. Его можно делать вручную или автоматически через HPA/VPA/Cluster Autoscaler.",
+      "q-178": "HorizontalPodAutoscaler автоматически меняет количество replicas по метрикам, например CPU, memory или custom metrics. Он помогает подстраиваться под нагрузку.",
+      "q-179": "ConfigMap хранит обычную конфигурацию, Secret - чувствительные значения. Secret кодируется и может быть дополнительно защищен encryption at rest и RBAC, но его нельзя считать безопасным без настройки кластера.",
+      "q-180": "Liveness probe проверяет, жив ли контейнер. Если проверка падает, kubelet перезапускает контейнер.",
+      "q-181": "Readiness probe проверяет, готов ли pod принимать трафик. Если проверка падает, pod убирается из endpoints Service, но не обязательно перезапускается.",
+      "q-182": "Health checks позволяют Kubernetes и балансировщикам понимать, живо ли приложение и готово ли оно обслуживать запросы. Они нужны для self-healing, rollout и исключения неготовых pods из трафика.",
+      "q-183": "Ingress управляет внешним HTTP/HTTPS-доступом к services внутри кластера. Для работы нужен ingress controller, например nginx, traefik или cloud-specific controller.",
+      "q-184": "Namespace - логическое пространство имен в Kubernetes для разделения ресурсов. Его используют для окружений, команд, приложений и настройки RBAC/quotas.",
+      "q-185": "Rolling update выполняет Deployment, постепенно создавая новые pods и удаляя старые согласно maxSurge и maxUnavailable. Readiness probes помогают не направлять трафик на неготовые pods.",
+      "q-186": "StatefulSet управляет stateful-приложениями с устойчивыми именами pod-ов, порядком запуска и persistent volumes. Его используют для баз данных, брокеров и кластерных систем, где важна identity.",
+      "q-187": "Обычно собирают metrics, logs, traces и events. Используют Prometheus/Grafana, Loki/ELK, OpenTelemetry, Kubernetes events, probes и alerting по SLO.",
+      "q-376": "REST - архитектурный стиль для построения сетевых API вокруг ресурсов, uniform interface, stateless-взаимодействия и стандартных HTTP-семантик. REST не является конкретным протоколом, но чаще реализуется поверх HTTP.",
+      "q-377": "Stateless означает, что каждый запрос содержит всю информацию, нужную серверу для обработки. Сервер не должен хранить conversational session state между запросами клиента.",
+      "q-378": "Частые методы: GET для чтения, POST для создания или команд, PUT для полной замены, PATCH для частичного изменения, DELETE для удаления, HEAD и OPTIONS для метаданных.",
+      "q-379": "PUT обычно заменяет ресурс целиком и должен быть идемпотентным. PATCH применяет частичное изменение и может быть идемпотентным или нет в зависимости от формата операции.",
+      "q-380": "Идемпотентность означает, что повторение одного и того же запроса дает тот же итоговый эффект на сервере. Это важно для retry и надежности сетевых операций.",
+      "q-381": "По HTTP-семантике GET, HEAD, OPTIONS, PUT и DELETE идемпотентны. POST обычно не идемпотентен, хотя его можно сделать идемпотентным через idempotency key.",
+      "q-382": "GET не должен менять состояние ресурса, поэтому повтор безопасен с точки зрения эффекта. DELETE после первого удаления оставляет ресурс удаленным, поэтому повторный DELETE не меняет итоговое состояние, хотя статус ответа может отличаться.",
+      "q-383": "По умолчанию POST не идемпотентен: повтор может создать несколько ресурсов или выполнить действие несколько раз. Для безопасных retry используют idempotency key или другой механизм дедупликации.",
+      "q-384": "Частые группы: 2xx success, 3xx redirects, 4xx client errors, 5xx server errors. Примеры: 200, 201, 204, 400, 401, 403, 404, 409, 422, 429, 500, 503.",
+      "q-385": "401 Unauthorized означает, что пользователь не аутентифицирован или токен невалиден. 403 Forbidden означает, что пользователь известен, но у него нет прав на действие.",
+      "q-386": "RESTful design моделирует API вокруг ресурсов и стандартных HTTP-методов, использует корректные status codes, content negotiation, stateless-запросы и понятные URI.",
+      "q-387": "Обычно используют существительные во множественном числе для ресурсов: /users, /orders/{id}. Иерархию делают только там, где она отражает ownership или естественную вложенность.",
+      "q-388": "Обычно нет: действие выражается HTTP-методом, а URL описывает ресурс. Глаголы допустимы для командных операций, которые плохо ложатся на CRUD, но их стоит использовать осознанно.",
+      "q-389": "HATEOAS - ограничение REST, где ответ содержит ссылки на доступные дальнейшие действия. Клиент может переходить по links, не зная заранее все URI и transitions.",
+      "q-390": "Версионирование делают через URL, headers, media type или совместимые изменения без явной версии. Важно иметь стратегию deprecation и backward compatibility.",
+      "q-391": "Content-Type описывает формат тела запроса или ответа, например application/json. Сервер и клиент используют его, чтобы корректно сериализовать и разобрать payload.",
+      "q-392": "Accept сообщает серверу, какие форматы ответа клиент готов принять. Это часть content negotiation, например Accept: application/json."
+};
+    let checkedQuestions = loadSet(storageKey);
+    let favoriteQuestions = loadSet(favoritesKey);
+
+    function normalize(value) {
+      return value.toLocaleLowerCase('ru-RU');
+    }
+
+    function loadSet(key) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        return new Set(Array.isArray(saved) ? saved : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveSet(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(Array.from(value)));
+      } catch {
+      }
+    }
+
+    function getQuestionId(question, index) {
+      const originalNumber = question.querySelector('.question-number')?.textContent.replace(/[^0-9]/g, '');
+      return originalNumber ? `q-${originalNumber}` : `q-${index + 1}`;
+    }
+
+    function updateChecklistProgress() {
+      checkedCount.textContent = `${checkedQuestions.size} из ${totalCount}`;
+    }
+
+    function updateFavoriteProgress() {
+      favoriteCount.textContent = `${favoriteQuestions.size} из ${totalCount}`;
+      favoriteTestCount.textContent = String(favoriteQuestions.size);
+      openFavoriteTestsButton.disabled = favoriteQuestions.size === 0;
+    }
+
+    function initializeChecklist() {
+      const knownQuestionIds = new Set();
+
+      allQuestions.forEach((question, index) => {
+        const questionId = getQuestionId(question, index);
+        knownQuestionIds.add(questionId);
+        question.dataset.questionId = questionId;
+
+        const label = document.createElement('label');
+        label.className = 'check-wrap';
+        label.setAttribute('aria-label', `Отметить вопрос ${questionId.replace('q-', '#')}`);
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'question-check';
+        checkbox.checked = checkedQuestions.has(questionId);
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            checkedQuestions.add(questionId);
+          } else {
+            checkedQuestions.delete(questionId);
+          }
+
+          question.classList.toggle('is-done', checkbox.checked);
+          saveSet(storageKey, checkedQuestions);
+          updateChecklistProgress();
+        });
+
+        label.append(checkbox);
+        question.prepend(label);
+        question.classList.toggle('is-done', checkbox.checked);
+
+        const answerButton = document.createElement('button');
+        answerButton.type = 'button';
+        answerButton.className = 'answer-toggle';
+        answerButton.textContent = 'Ответ';
+        answerButton.setAttribute('aria-expanded', 'false');
+        answerButton.setAttribute('aria-controls', `${questionId}-answer`);
+        answerButton.title = 'Показать ответ';
+
+        const answerPanel = document.createElement('div');
+        answerPanel.className = 'answer-panel';
+        answerPanel.id = `${questionId}-answer`;
+        answerPanel.hidden = true;
+        answerPanel.textContent = answerTexts[questionId] || 'В PDF есть только вопрос; ответ нужно добавить отдельно.';
+
+        answerButton.addEventListener('click', () => {
+          const isOpen = answerButton.getAttribute('aria-expanded') !== 'true';
+          answerButton.setAttribute('aria-expanded', String(isOpen));
+          answerButton.textContent = isOpen ? 'Скрыть' : 'Ответ';
+          answerButton.title = isOpen ? 'Скрыть ответ' : 'Показать ответ';
+          answerPanel.hidden = !isOpen;
+        });
+
+        const favoriteButton = document.createElement('button');
+        favoriteButton.type = 'button';
+        favoriteButton.className = 'favorite-toggle';
+        favoriteButton.setAttribute('aria-label', `Отметить вопрос ${questionId.replace('q-', '#')} как понравившийся`);
+        favoriteButton.setAttribute('aria-pressed', String(favoriteQuestions.has(questionId)));
+        favoriteButton.title = 'Понравился вопрос';
+
+        favoriteButton.addEventListener('click', () => {
+          const isFavorite = !favoriteQuestions.has(questionId);
+          if (isFavorite) {
+            favoriteQuestions.add(questionId);
+          } else {
+            favoriteQuestions.delete(questionId);
+          }
+
+          question.classList.toggle('is-favorite', isFavorite);
+          favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+          saveSet(favoritesKey, favoriteQuestions);
+          updateFavoriteProgress();
+        });
+
+        question.append(answerButton, favoriteButton, answerPanel);
+        question.classList.toggle('is-favorite', favoriteQuestions.has(questionId));
+      });
+
+      checkedQuestions = new Set(Array.from(checkedQuestions).filter((questionId) => knownQuestionIds.has(questionId)));
+      favoriteQuestions = new Set(Array.from(favoriteQuestions).filter((questionId) => knownQuestionIds.has(questionId)));
+      saveSet(storageKey, checkedQuestions);
+      saveSet(favoritesKey, favoriteQuestions);
+      updateChecklistProgress();
+      updateFavoriteProgress();
+    }
+
+    function applySearch() {
+      const term = normalize(searchInput.value.trim());
+      let visibleQuestions = 0;
+      let visibleTopics = 0;
+
+      topics.forEach((topic) => {
+        const questions = Array.from(topic.querySelectorAll('.question'));
+        let topicVisibleQuestions = 0;
+
+        questions.forEach((question) => {
+          const matches = !term || normalize(question.dataset.text).includes(term);
+          question.hidden = !matches;
+          if (matches) {
+            topicVisibleQuestions += 1;
+            visibleQuestions += 1;
+          }
+        });
+
+        topic.hidden = topicVisibleQuestions === 0;
+        if (topicVisibleQuestions > 0) visibleTopics += 1;
+        topic.querySelector('.section-count').textContent = `${topicVisibleQuestions} / ${topic.dataset.total} вопросов`;
+      });
+
+      visibleCount.textContent = `${visibleQuestions} из ${totalCount}`;
+      emptyState.classList.toggle('is-visible', visibleQuestions === 0);
+      document.body.dataset.visibleTopics = String(visibleTopics);
+    }
+
+    function initializeTopicTests() {
+      topics.forEach((topic) => {
+        if (topic.querySelector('.topic-test-button')) return;
+
+        const side = topic.querySelector('.topic-side');
+        const title = topic.querySelector('.topic-title')?.textContent.trim() || 'теме';
+        if (!side) return;
+
+        const testButton = document.createElement('button');
+        testButton.type = 'button';
+        testButton.className = 'topic-test-button';
+        testButton.textContent = 'Тест';
+        testButton.setAttribute('aria-label', `Открыть тест по теме ${title}`);
+        testButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openTestWindow(topic.id);
+        });
+
+        side.append(testButton);
+      });
+    }
+
+    function collectTestTopics() {
+      return topics.map((topic, topicIndex) => {
+        const accentMatch = /--accent:\s*([^;]+)/.exec(topic.getAttribute('style') || '');
+        const title = topic.querySelector('.topic-title')?.textContent.trim() || `Тема ${topicIndex + 1}`;
+        const kicker = topic.querySelector('.topic-kicker')?.textContent.trim() || '';
+
+        return {
+          id: topic.id,
+          index: String(topicIndex + 1).padStart(2, '0'),
+          title,
+          kicker,
+          accent: accentMatch ? accentMatch[1].trim() : '#2563eb',
+          questions: Array.from(topic.querySelectorAll('.question')).map((question, questionIndex) => {
+            const questionId = question.dataset.questionId || getQuestionId(question, questionIndex);
+            return {
+              id: questionId,
+              number: question.querySelector('.question-number')?.textContent.trim() || questionId.replace('q-', '#'),
+              text: question.querySelector('.question-text')?.textContent.trim() || question.dataset.text || '',
+              answer: answerTexts[questionId] || 'Ответ пока не добавлен.'
+            };
+          })
+        };
+      });
+    }
+
+    function collectFavoriteTestTopics() {
+      const favoriteItems = [];
+      const seenQuestionIds = new Set();
+
+      collectTestTopics().forEach((topic) => {
+        topic.questions.forEach((question) => {
+          if (!favoriteQuestions.has(question.id) || seenQuestionIds.has(question.id)) return;
+          seenQuestionIds.add(question.id);
+          favoriteItems.push(Object.assign({
+            topicId: topic.id,
+            topicTitle: topic.title,
+            topicIndex: topic.index,
+            kicker: topic.kicker,
+            accent: topic.accent
+          }, question));
+        });
+      });
+
+      return [{
+        id: 'favorite-questions',
+        index: '★',
+        title: 'Вопросы со звездочкой',
+        kicker: 'Избранное',
+        accent: '#f59e0b',
+        questions: favoriteItems
+      }];
+    }
+
+    function openTestWindow(initialTopicId = 'all', providedTestTopics = null) {
+      const testTopics = providedTestTopics || collectTestTopics();
+      const popup = window.open('', 'pdf-remaining-topics-tests', 'width=1240,height=900,scrollbars=yes,resizable=yes');
+
+      if (!popup) {
+        alert('Браузер заблокировал отдельное окно для тестов.');
+        return;
+      }
+
+      popup.document.open();
+      popup.document.write(buildTestWindowHtml(testTopics, initialTopicId));
+      popup.document.close();
+      popup.focus();
+    }
+
+    function openFavoriteTestWindow() {
+      const favoriteTestTopics = collectFavoriteTestTopics();
+      if (!favoriteTestTopics[0].questions.length) {
+        alert('Сначала отметь вопросы звездочкой.');
+        updateFavoriteProgress();
+        return;
+      }
+
+      openTestWindow('favorite-questions', favoriteTestTopics);
+    }
+
+    function buildTestWindowHtml(testTopics, initialTopicId) {
+      const topicsJson = JSON.stringify(testTopics).replace(/</g, '\\u003c');
+      const initialTopicJson = JSON.stringify(initialTopicId);
+
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF: микросервисы, Kafka, Docker/Kubernetes и REST - тесты</title>
+  <style>
+    :root { color-scheme: light; --bg: #f5f7fb; --paper: #ffffff; --ink: #17202a; --muted: #5b6472; --soft: #eef2f6; --line: #dce3eb; --strong-line: #c6d0dc; --danger: #b91c1c; --warn: #b45309; --ok: #15803d; --shadow: 0 14px 34px rgba(15, 23, 42, 0.08); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, rgba(8, 145, 178, 0.08), rgba(255, 255, 255, 0) 340px), var(--bg); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.5; letter-spacing: 0; }
+    button, select { font: inherit; }
+    .exam-shell { width: min(1280px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 42px; }
+    .exam-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; padding: 10px 0 18px; border-bottom: 1px solid var(--line); }
+    h1 { margin: 0; font-size: 1.7rem; line-height: 1.12; font-weight: 850; letter-spacing: 0; }
+    .exam-meta { margin-top: 8px; color: var(--muted); font-size: 0.94rem; }
+    .close-button, .control-button, .topic-tab, .action-button { border: 1px solid var(--strong-line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 800; transition: background 140ms ease, border-color 140ms ease, color 140ms ease; }
+    .close-button, .control-button { height: 40px; padding: 0 12px; white-space: nowrap; }
+    .close-button:hover, .control-button:hover, .topic-tab:hover, .action-button:hover { border-color: #94a3b8; background: #f8fafc; }
+    .control-bar { position: sticky; top: 0; z-index: 4; display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 10px; align-items: center; margin: 18px 0; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06); backdrop-filter: blur(12px); }
+    .topic-select { min-width: 0; height: 40px; padding: 0 10px; border: 1px solid var(--strong-line); border-radius: 8px; background: #fff; color: var(--ink); }
+    .progress-line { grid-column: 1 / -1; display: grid; gap: 7px; }
+    .progress-copy { display: flex; gap: 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.9rem; }
+    .progress-track { height: 8px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+    .progress-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #16a34a, #0891b2); transition: width 160ms ease; }
+    .exam-layout { display: grid; grid-template-columns: 278px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .topic-rail { position: sticky; top: 88px; display: grid; gap: 8px; }
+    .topic-tab { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 48px; padding: 8px; text-align: left; border-left: 4px solid var(--accent, #2563eb); }
+    .topic-tab.is-active { border-color: var(--accent, #2563eb); background: color-mix(in srgb, var(--accent, #2563eb), white 92%); color: var(--accent, #2563eb); }
+    .topic-index { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--accent, #2563eb), white 86%); color: var(--accent, #2563eb); font-size: 0.78rem; }
+    .topic-name { min-width: 0; overflow-wrap: anywhere; }
+    .topic-count { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+    .questions-pane { display: grid; gap: 10px; }
+    .test-card { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-left: 5px solid var(--accent, #2563eb); border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
+    .test-card[data-status="known"] { border-color: color-mix(in srgb, var(--ok), white 56%); border-left-color: var(--ok); background: color-mix(in srgb, var(--ok), white 96%); }
+    .test-card[data-status="review"] { border-color: color-mix(in srgb, var(--warn), white 48%); border-left-color: var(--warn); background: color-mix(in srgb, var(--warn), white 96%); }
+    .card-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .tag { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 8px; border-radius: 8px; background: var(--soft); color: #334155; font-size: 0.78rem; font-weight: 850; }
+    .tag-accent { background: color-mix(in srgb, var(--accent, #2563eb), white 88%); color: var(--accent, #2563eb); }
+    .status { color: var(--muted); font-size: 0.82rem; font-weight: 800; }
+    .test-card[data-status="known"] .status { color: var(--ok); }
+    .test-card[data-status="review"] .status { color: var(--warn); }
+    .prompt { margin: 0; font-size: 1.04rem; font-weight: 820; line-height: 1.35; overflow-wrap: anywhere; }
+    .rubric { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfe; color: #334155; font-size: 0.9rem; }
+    .rubric strong { color: var(--ink); font-size: 0.84rem; }
+    .options { display: grid; gap: 8px; }
+    .option-button { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; min-height: 58px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; text-align: left; transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+    .option-button:hover { border-color: color-mix(in srgb, var(--accent, #2563eb), white 42%); background: color-mix(in srgb, var(--accent, #2563eb), white 97%); }
+    .option-button.is-selected { border-color: var(--accent, #2563eb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #2563eb), transparent 84%); }
+    .option-button.is-correct { border-color: color-mix(in srgb, var(--ok), white 32%); background: color-mix(in srgb, var(--ok), white 92%); }
+    .option-button.is-wrong { border-color: color-mix(in srgb, var(--danger), white 36%); background: color-mix(in srgb, var(--danger), white 94%); }
+    .option-letter { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--soft); color: #334155; font-size: 0.82rem; font-weight: 850; }
+    .option-button.is-selected .option-letter { background: var(--accent, #2563eb); color: #fff; }
+    .option-button.is-correct .option-letter { background: var(--ok); color: #fff; }
+    .option-button.is-wrong .option-letter { background: var(--danger); color: #fff; }
+    .option-text { min-width: 0; color: #253244; font-size: 0.94rem; line-height: 1.46; overflow-wrap: anywhere; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .action-button { min-height: 34px; padding: 0 10px; font-size: 0.88rem; }
+    .action-primary { border-color: color-mix(in srgb, var(--accent, #2563eb), white 52%); background: color-mix(in srgb, var(--accent, #2563eb), white 92%); color: var(--accent, #2563eb); }
+    .action-primary:hover { border-color: var(--accent, #2563eb); background: var(--accent, #2563eb); color: #fff; }
+    .feedback, .warning { display: grid; gap: 6px; padding: 12px 14px; border-radius: 8px; color: #334155; font-size: 0.92rem; }
+    .feedback { border: 1px solid color-mix(in srgb, var(--accent, #2563eb), white 70%); background: color-mix(in srgb, var(--accent, #2563eb), white 96%); }
+    .feedback.is-correct { border-color: color-mix(in srgb, var(--ok), white 54%); background: color-mix(in srgb, var(--ok), white 95%); }
+    .feedback.is-wrong { border-color: color-mix(in srgb, var(--danger), white 58%); background: color-mix(in srgb, var(--danger), white 96%); }
+    .warning { display: none; border: 1px solid color-mix(in srgb, var(--danger), white 62%); background: color-mix(in srgb, var(--danger), white 96%); color: var(--danger); }
+    .warning.is-visible { display: grid; }
+    .feedback strong, .warning strong { color: var(--ink); font-size: 0.86rem; }
+    .feedback p, .warning p { margin: 0; }
+    .empty-state { padding: 22px; border: 1px dashed var(--strong-line); border-radius: 8px; background: rgba(255, 255, 255, 0.72); color: var(--muted); text-align: center; }
+    [hidden] { display: none !important; }
+    @media (max-width: 980px) { .exam-header, .exam-layout, .control-bar { grid-template-columns: 1fr; } .topic-rail { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); } .close-button, .control-button { width: 100%; } }
+    @media (max-width: 620px) { .exam-shell { width: min(100% - 20px, 1280px); padding-top: 14px; } h1 { font-size: 1.38rem; } .topic-rail { grid-template-columns: 1fr; } .progress-copy { display: grid; gap: 4px; justify-content: stretch; } .card-head { display: grid; justify-content: stretch; } .card-actions { display: grid; grid-template-columns: 1fr; } .action-button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="exam-shell">
+    <header class="exam-header">
+      <div>
+        <h1>PDF: микросервисы, Kafka, Docker/Kubernetes и REST - тесты</h1>
+        <div class="exam-meta"><span id="scopeCount">0 заданий</span> · 4 варианта · один правильный ответ</div>
+      </div>
+      <button id="closeWindow" class="close-button" type="button">Закрыть</button>
+    </header>
+    <section class="control-bar" aria-label="Управление тестами">
+      <select id="topicSelect" class="topic-select" aria-label="Тема теста"></select>
+      <button id="shuffleButton" class="control-button" type="button" aria-pressed="false">Смешать</button>
+      <button id="reviewButton" class="control-button" type="button" aria-pressed="false">Только повтор</button>
+      <button id="resetProgress" class="control-button" type="button">Сбросить прогресс</button>
+      <div class="progress-line">
+        <div class="progress-copy">
+          <span id="progressText">0 верно · 0 повторить · 0 без ответа</span>
+          <span id="modeText">Все темы</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><span id="progressFill" class="progress-fill"></span></div>
+      </div>
+    </section>
+    <div class="exam-layout">
+      <aside id="topicRail" class="topic-rail" aria-label="Темы"></aside>
+      <section id="questionsPane" class="questions-pane" aria-live="polite"></section>
+    </div>
+  </main>
+  <script>
+    const testTopics = ${topicsJson};
+    const initialTopicId = ${initialTopicJson};
+    const storageKey = 'pdf-remaining-topics-test-progress-v1';
+    const optionLetters = ['A', 'B', 'C', 'D'];
+    const genericDistractors = [
+      'Этот вариант смешивает разные механизмы распределенных систем и поэтому не отвечает точно на вопрос.',
+      'Это неверно: важно учитывать протокол, брокер, контейнерную платформу и границы ответственности сервиса.',
+      'Такое поведение не является универсальным правилом и зависит от конкретной технологии и сценария.',
+      'Этот ответ игнорирует практические ограничения: retries, ordering, scaling, routing, rollout и observability.'
+    ];
+
+    let progress = loadJson(storageKey, {});
+    let currentTopicId = testTopics.some(function(topic) { return topic.id === initialTopicId; }) ? initialTopicId : 'all';
+    let onlyReview = false;
+    let shuffled = false;
+    let shuffleSeed = 1;
+    const topicSelect = document.querySelector('#topicSelect');
+    const topicRail = document.querySelector('#topicRail');
+    const questionsPane = document.querySelector('#questionsPane');
+    const scopeCount = document.querySelector('#scopeCount');
+    const progressText = document.querySelector('#progressText');
+    const modeText = document.querySelector('#modeText');
+    const progressFill = document.querySelector('#progressFill');
+    const shuffleButton = document.querySelector('#shuffleButton');
+    const reviewButton = document.querySelector('#reviewButton');
+
+    function loadJson(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || 'null');
+        return value && typeof value === 'object' ? value : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function(char) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char];
+      });
+    }
+
+    function hashValue(value) {
+      let hash = 0;
+      for (let i = 0; i < value.length; i += 1) {
+        hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function sortedBySeed(items, seed) {
+      return items.slice().sort(function(left, right) {
+        return hashValue(left.id + ':' + seed) - hashValue(right.id + ':' + seed);
+      });
+    }
+
+    function allQuestionItems() {
+      return testTopics.flatMap(function(topic) {
+        return topic.questions.map(function(question) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, accent: topic.accent }, question);
+        });
+      });
+    }
+
+    function scopeTopics() {
+      return currentTopicId === 'all' ? testTopics : testTopics.filter(function(topic) { return topic.id === currentTopicId; });
+    }
+
+    function scopeQuestions(ignoreReviewFilter) {
+      let items = scopeTopics().flatMap(function(topic) {
+        return topic.questions.map(function(question) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, accent: topic.accent }, question);
+        });
+      });
+      if (onlyReview && !ignoreReviewFilter) {
+        items = items.filter(function(item) {
+          return progress[item.id] && progress[item.id].status === 'review';
+        });
+      }
+      return shuffled ? sortedBySeed(items, 'scope:' + shuffleSeed) : items;
+    }
+
+    function normalized(value) {
+      return String(value).trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+    }
+
+    function choicesFor(item) {
+      const choices = [{ id: item.id + '-correct', text: item.answer, correct: true }];
+      const seen = new Set([normalized(item.answer)]);
+      const related = allQuestionItems()
+        .filter(function(candidate) { return candidate.id !== item.id; })
+        .map(function(candidate) {
+          const sameTopic = candidate.topicId === item.topicId ? 1000 : 0;
+          return { id: item.id + '-choice-' + candidate.id, text: candidate.answer, correct: false, score: sameTopic + hashValue(item.id + ':' + candidate.id) };
+        })
+        .sort(function(left, right) { return right.score - left.score; });
+
+      related.concat(genericDistractors.map(function(text, index) {
+        return { id: item.id + '-generic-' + index, text: text, correct: false };
+      })).some(function(choice) {
+        const key = normalized(choice.text);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        choices.push(choice);
+        return choices.length >= 4;
+      });
+
+      return sortedBySeed(choices.slice(0, 4), item.id + ':' + shuffleSeed);
+    }
+
+    function statusLabel(status, checked, selectedText) {
+      if (status === 'known') return 'Верно';
+      if (status === 'review') return 'Повторить';
+      if (selectedText && !checked) return 'Выбран вариант';
+      return 'Без ответа';
+    }
+
+    function currentTopicTitle() {
+      if (currentTopicId === 'all') return 'Все темы';
+      const topic = testTopics.find(function(item) { return item.id === currentTopicId; });
+      return topic ? topic.title : 'Все темы';
+    }
+
+    function renderTopicSelect() {
+      topicSelect.innerHTML = '<option value="all">Все темы</option>' + testTopics.map(function(topic) {
+        return '<option value="' + escapeHtml(topic.id) + '">' + topic.index + '. ' + escapeHtml(topic.title) + '</option>';
+      }).join('');
+      topicSelect.value = currentTopicId;
+    }
+
+    function renderTopicRail() {
+      topicRail.innerHTML = testTopics.map(function(topic) {
+        const total = topic.questions.length;
+        const known = topic.questions.filter(function(question) { return progress[question.id] && progress[question.id].status === 'known'; }).length;
+        const review = topic.questions.filter(function(question) { return progress[question.id] && progress[question.id].status === 'review'; }).length;
+        return '<button class="topic-tab ' + (topic.id === currentTopicId ? 'is-active' : '') + '" type="button" data-topic-id="' + escapeHtml(topic.id) + '" style="--accent: ' + escapeHtml(topic.accent) + '">' +
+          '<span class="topic-index">' + topic.index + '</span>' +
+          '<span class="topic-name">' + escapeHtml(topic.title) + '</span>' +
+          '<span class="topic-count">' + known + '/' + total + (review ? ' · ' + review : '') + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
+    function choiceMarkup(choice, index, state) {
+      const selected = state.selectedText === choice.text;
+      const checked = state.checked === true;
+      const classes = ['option-button'];
+      if (selected) classes.push('is-selected');
+      if (checked && choice.correct) classes.push('is-correct');
+      if (checked && selected && !choice.correct) classes.push('is-wrong');
+      return '<button class="' + classes.join(' ') + '" type="button" role="radio" aria-checked="' + String(selected) + '" data-action="select" data-correct="' + String(choice.correct) + '">' +
+        '<span class="option-letter">' + optionLetters[index] + '</span>' +
+        '<span class="option-text">' + escapeHtml(choice.text) + '</span>' +
+      '</button>';
+    }
+
+    function renderQuestions() {
+      const items = scopeQuestions(false);
+      if (!items.length) {
+        questionsPane.innerHTML = '<div class="empty-state">Нет заданий для текущего фильтра.</div>';
+        updateStats();
+        return;
+      }
+      questionsPane.innerHTML = items.map(function(item, index) {
+        const state = progress[item.id] || {};
+        const choices = choicesFor(item);
+        const selectedCorrect = state.selectedText === item.answer;
+        return '<article class="test-card" data-id="' + escapeHtml(item.id) + '" data-status="' + escapeHtml(state.status || '') + '" style="--accent: ' + escapeHtml(item.accent) + '">' +
+          '<div class="card-head"><div class="card-tags">' +
+          '<span class="tag tag-accent">' + escapeHtml(item.number) + '</span>' +
+          '<span class="tag">' + escapeHtml(item.topicIndex) + '. ' + escapeHtml(item.topicTitle) + '</span>' +
+          '<span class="tag">Задание ' + (index + 1) + '</span></div>' +
+          '<span class="status">' + statusLabel(state.status, state.checked, state.selectedText) + '</span></div>' +
+          '<p class="prompt">' + escapeHtml(item.text) + '</p>' +
+          '<div class="rubric"><strong>Выбери самый точный ответ</strong><span>Вопрос взят из PDF, варианты построены по кратким ответам к этим вопросам.</span></div>' +
+          '<div class="options" role="radiogroup" aria-label="Варианты ответа">' + choices.map(function(choice, choiceIndex) { return choiceMarkup(choice, choiceIndex, state); }).join('') + '</div>' +
+          '<div class="warning" data-warning><strong>Вариант не выбран.</strong><p>Сначала выбери один ответ, потом нажми проверку.</p></div>' +
+          '<div class="card-actions"><button class="action-button action-primary" type="button" data-action="check">Проверить</button><button class="action-button" type="button" data-action="clear">Сброс</button></div>' +
+          '<div class="feedback ' + (selectedCorrect ? 'is-correct' : 'is-wrong') + '" data-feedback ' + (state.checked ? '' : 'hidden') + '><strong>' + (selectedCorrect ? 'Верно' : 'Неверно') + '</strong><p>' + escapeHtml(selectedCorrect ? 'Ответ засчитан. Проверь формулировку: ' + item.answer : 'Правильный вариант: ' + item.answer) + '</p></div>' +
+        '</article>';
+      }).join('');
+      updateStats();
+    }
+
+    function updateStats() {
+      const scoped = scopeQuestions(true);
+      const visible = scopeQuestions(false);
+      const known = scoped.filter(function(item) { return progress[item.id] && progress[item.id].status === 'known'; }).length;
+      const review = scoped.filter(function(item) { return progress[item.id] && progress[item.id].status === 'review'; }).length;
+      const remaining = Math.max(scoped.length - known - review, 0);
+      const percent = scoped.length ? Math.round((known / scoped.length) * 100) : 0;
+      scopeCount.textContent = visible.length + ' из ' + scoped.length + ' заданий';
+      progressText.textContent = known + ' верно · ' + review + ' повторить · ' + remaining + ' без ответа';
+      modeText.textContent = currentTopicTitle() + (onlyReview ? ' · только повтор' : '') + (shuffled ? ' · смешано' : '');
+      progressFill.style.width = percent + '%';
+      reviewButton.setAttribute('aria-pressed', String(onlyReview));
+      shuffleButton.setAttribute('aria-pressed', String(shuffled));
+    }
+
+    function currentItemForCard(card) {
+      return allQuestionItems().find(function(item) { return item.id === card.dataset.id; });
+    }
+
+    function selectOption(card, button) {
+      const id = card.dataset.id;
+      const text = button.querySelector('.option-text').textContent;
+      progress[id] = { selectedText: text, checked: false, status: '', updatedAt: new Date().toISOString() };
+      saveJson(storageKey, progress);
+      Array.from(card.querySelectorAll('.option-button')).forEach(function(item) {
+        const selected = item === button;
+        item.classList.toggle('is-selected', selected);
+        item.classList.remove('is-correct', 'is-wrong');
+        item.setAttribute('aria-checked', String(selected));
+      });
+      card.querySelector('[data-feedback]').hidden = true;
+      card.querySelector('[data-warning]').classList.remove('is-visible');
+      card.dataset.status = '';
+      card.querySelector('.status').textContent = 'Выбран вариант';
+      renderTopicRail();
+      updateStats();
+    }
+
+    function checkCard(card) {
+      const item = currentItemForCard(card);
+      const selected = card.querySelector('.option-button.is-selected');
+      const warning = card.querySelector('[data-warning]');
+      const feedback = card.querySelector('[data-feedback]');
+      if (!selected || !item) {
+        warning.classList.add('is-visible');
+        return;
+      }
+      const isCorrect = selected.dataset.correct === 'true';
+      const status = isCorrect ? 'known' : 'review';
+      const selectedText = selected.querySelector('.option-text').textContent;
+      progress[item.id] = { selectedText: selectedText, checked: true, status: status, updatedAt: new Date().toISOString() };
+      saveJson(storageKey, progress);
+      Array.from(card.querySelectorAll('.option-button')).forEach(function(button) {
+        const buttonCorrect = button.dataset.correct === 'true';
+        const buttonSelected = button === selected;
+        button.classList.toggle('is-correct', buttonCorrect);
+        button.classList.toggle('is-wrong', buttonSelected && !buttonCorrect);
+      });
+      card.dataset.status = status;
+      card.querySelector('.status').textContent = statusLabel(status, true, selectedText);
+      warning.classList.remove('is-visible');
+      feedback.classList.toggle('is-correct', isCorrect);
+      feedback.classList.toggle('is-wrong', !isCorrect);
+      feedback.querySelector('strong').textContent = isCorrect ? 'Верно' : 'Неверно';
+      feedback.querySelector('p').textContent = isCorrect ? 'Ответ засчитан. Проверь формулировку: ' + item.answer : 'Правильный вариант: ' + item.answer;
+      feedback.hidden = false;
+      renderTopicRail();
+      updateStats();
+      if (onlyReview && isCorrect) renderQuestions();
+    }
+
+    function clearCard(card) {
+      const id = card.dataset.id;
+      delete progress[id];
+      saveJson(storageKey, progress);
+      renderQuestions();
+      renderTopicRail();
+    }
+
+    topicSelect.addEventListener('change', function() {
+      currentTopicId = topicSelect.value;
+      renderTopicRail();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    topicRail.addEventListener('click', function(event) {
+      const button = event.target.closest('[data-topic-id]');
+      if (!button) return;
+      currentTopicId = button.dataset.topicId;
+      topicSelect.value = currentTopicId;
+      renderTopicRail();
+      renderQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    questionsPane.addEventListener('click', function(event) {
+      const option = event.target.closest('[data-action="select"]');
+      if (option) {
+        selectOption(option.closest('.test-card'), option);
+        return;
+      }
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const card = button.closest('.test-card');
+      if (button.dataset.action === 'check') checkCard(card);
+      if (button.dataset.action === 'clear') clearCard(card);
+    });
+    shuffleButton.addEventListener('click', function() {
+      shuffled = !shuffled;
+      shuffleSeed += 1;
+      renderQuestions();
+    });
+    reviewButton.addEventListener('click', function() {
+      onlyReview = !onlyReview;
+      renderQuestions();
+    });
+    document.querySelector('#resetProgress').addEventListener('click', function() {
+      if (!confirm('Сбросить прогресс тестов?')) return;
+      progress = {};
+      saveJson(storageKey, progress);
+      renderTopicRail();
+      renderQuestions();
+    });
+    document.querySelector('#closeWindow').addEventListener('click', function() {
+      window.close();
+    });
+    renderTopicSelect();
+    renderTopicRail();
+    renderQuestions();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    document.querySelector('#expandAll').addEventListener('click', () => {
+      topics.forEach((topic) => topic.querySelector('details').open = true);
+    });
+
+    document.querySelector('#collapseAll').addEventListener('click', () => {
+      topics.forEach((topic) => topic.querySelector('details').open = false);
+    });
+
+    resetChecks.addEventListener('click', () => {
+      checkedQuestions.clear();
+      allQuestions.forEach((question) => {
+        const checkbox = question.querySelector('.question-check');
+        if (checkbox) checkbox.checked = false;
+        question.classList.remove('is-done');
+      });
+      saveSet(storageKey, checkedQuestions);
+      updateChecklistProgress();
+    });
+
+    openTestsButton.addEventListener('click', () => openTestWindow('all'));
+    openFavoriteTestsButton.addEventListener('click', openFavoriteTestWindow);
+    searchInput.addEventListener('input', applySearch);
+    initializeChecklist();
+    initializeTopicTests();
+    applySearch();
+</script>
+</body>
+</html>
