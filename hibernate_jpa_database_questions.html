@@ -115,7 +115,7 @@
       top: 0;
       z-index: 5;
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto auto auto auto;
       gap: 10px;
       align-items: center;
       margin: 18px 0;
@@ -144,6 +144,9 @@
     }
 
     .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       height: 42px;
       padding: 0 13px;
       border: 1px solid var(--strong-line);
@@ -209,7 +212,7 @@
     }
 
     .favorite-counter {
-      grid-column: 5;
+      grid-column: 7;
       justify-self: end;
     }
 
@@ -646,14 +649,17 @@
 
     [hidden] { display: none !important; }
 
-    @media (max-width: 920px) {
-      .stats { grid-template-columns: 1fr; }
-      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 1160px) {
       .toolbar { grid-template-columns: 1fr 1fr; }
       .search, .visible-counter, .check-counter, .favorite-counter { grid-column: 1 / -1; }
       .visible-counter { order: 4; }
       .check-counter { order: 5; justify-self: start; }
       .favorite-counter { order: 6; justify-self: start; }
+    }
+
+    @media (max-width: 920px) {
+      .stats { grid-template-columns: 1fr; }
+      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       summary { grid-template-columns: auto minmax(0, 1fr); }
       summary::after { grid-column: 1 / -1; width: 100%; }
       .topic-side { grid-column: 1 / -1; margin-right: 0; flex-wrap: wrap; }
@@ -706,6 +712,8 @@
 
     <div class="toolbar" aria-label="Управление списком">
       <input id="search" class="search" type="search" placeholder="Поиск по вопросам" autocomplete="off">
+      <a class="button" href="index.html">На главную</a>
+      <button id="markAllChecks" class="button" type="button">Отметить все</button>
       <button id="expandAll" class="button" type="button">Раскрыть все</button>
       <button id="collapseAll" class="button" type="button">Свернуть все</button>
       <button id="resetChecks" class="button" type="button">Сбросить чеклист</button>
@@ -1128,6 +1136,7 @@
     const checkedCount = document.querySelector('#checkedCount');
     const favoriteCount = document.querySelector('#favoriteCount');
     const resetChecks = document.querySelector('#resetChecks');
+    const markAllChecks = document.querySelector('#markAllChecks');
     const openTestsButton = document.querySelector('#openTests');
     const openFavoriteTestsButton = document.querySelector('#openFavoriteTests');
     const favoriteTestCount = document.querySelector('#favoriteTestCount');
@@ -1912,6 +1921,17 @@
 
     document.querySelector('#collapseAll').addEventListener('click', () => {
       topics.forEach((topic) => topic.querySelector('details').open = false);
+    });
+
+    markAllChecks.addEventListener('click', () => {
+      allQuestions.forEach((question) => {
+        if (question.dataset.questionId) checkedQuestions.add(question.dataset.questionId);
+        const checkbox = question.querySelector('.question-check');
+        if (checkbox) checkbox.checked = true;
+        question.classList.add('is-done');
+      });
+      saveSet(storageKey, checkedQuestions);
+      updateChecklistProgress();
     });
 
     resetChecks.addEventListener('click', () => {
