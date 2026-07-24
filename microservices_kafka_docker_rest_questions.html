@@ -114,9 +114,9 @@
       position: sticky;
       top: 0;
       z-index: 5;
-      display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto auto auto auto auto auto;
-      gap: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       align-items: center;
       margin: 18px 0;
       padding: 12px;
@@ -128,6 +128,7 @@
     }
 
     .search {
+      flex: 1 1 170px;
       min-width: 0;
       height: 42px;
       padding: 0 12px;
@@ -145,6 +146,7 @@
 
     .button {
       display: inline-flex;
+      flex: 0 0 auto;
       align-items: center;
       justify-content: center;
       height: 42px;
@@ -199,22 +201,13 @@
     .visible-counter,
     .check-counter,
     .favorite-counter {
+      flex: 1 1 180px;
       color: var(--muted);
       font-size: 0.9rem;
       white-space: nowrap;
     }
 
-    .visible-counter { grid-column: 1; }
-
-    .check-counter {
-      grid-column: 2 / span 2;
-      justify-self: start;
-    }
-
-    .favorite-counter {
-      grid-column: 7;
-      justify-self: end;
-    }
+    .favorite-counter { text-align: right; }
 
     .nav-grid {
       display: grid;
