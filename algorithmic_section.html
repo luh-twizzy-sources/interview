@@ -1,0 +1,1787 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Алгоритмическая секция: Tinkoff</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --soft: #eef2f6;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --rose: #be123c;
+      --teal: #0d9488;
+      --violet: #7c3aed;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0) 360px),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, input { font: inherit; }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 24px;
+      padding: 28px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-main {
+      display: grid;
+      gap: 14px;
+      max-width: 820px;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      padding: 5px 10px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #2f3a4a;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 760px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 920px;
+    }
+
+    .stat {
+      min-height: 82px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 18px 0 22px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .search {
+      width: 230px;
+      min-height: 42px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .search:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.22);
+      border-color: var(--blue);
+    }
+
+    .button,
+    .answer-toggle,
+    .favorite-toggle,
+    .topic-test-button {
+      min-height: 42px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 13px;
+      white-space: nowrap;
+    }
+
+    .button:hover,
+    .answer-toggle:hover,
+    .favorite-toggle:hover,
+    .topic-test-button:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .button:disabled,
+    .button:disabled:hover {
+      border-color: var(--line);
+      background: #f8fafc;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .topic-test-button {
+      padding: 0 12px;
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent), white 40%);
+      background: color-mix(in srgb, var(--accent), white 94%);
+      white-space: nowrap;
+    }
+
+    .visible-counter,
+    .check-counter,
+    .favorite-counter {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .favorite-counter {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .nav-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px 10px;
+      align-items: center;
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent), white 42%);
+      background: #fff;
+    }
+
+    .nav-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-weight: 850;
+      font-size: 0.82rem;
+    }
+
+    .nav-title {
+      color: var(--ink);
+      font-weight: 850;
+      line-height: 1.18;
+      overflow-wrap: anywhere;
+    }
+
+    .nav-meta {
+      grid-column: 2;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 26px;
+    }
+
+    .topic {
+      scroll-margin-top: 86px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    details { display: block; }
+
+    summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "-";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    details:not([open]) summary::after { content: "+"; }
+
+    .topic-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 84%);
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    .topic-heading {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .topic-kicker {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .topic-title {
+      color: var(--ink);
+      font-size: 1.32rem;
+      line-height: 1.15;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+
+    .topic-side {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-right: 8px;
+    }
+
+    .section-count,
+    .difficulty-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .section-count {
+      background: var(--soft);
+      color: #334155;
+    }
+
+    .difficulty-chip {
+      border: 1px solid color-mix(in srgb, var(--accent), white 52%);
+      background: color-mix(in srgb, var(--accent), white 92%);
+      color: color-mix(in srgb, var(--accent), black 8%);
+    }
+
+    .topic-content {
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .topic-summary {
+      margin: 18px 0;
+      color: var(--muted);
+      max-width: 920px;
+    }
+
+    .questions {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: question;
+    }
+
+    .question {
+      counter-increment: question;
+      display: grid;
+      grid-template-columns: 34px 72px minmax(0, 1fr) 92px 42px;
+      gap: 8px 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .question.is-done {
+      background: linear-gradient(90deg, rgba(22, 163, 74, 0.08), #fff 44%);
+    }
+
+    .question.is-done .question-text {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgba(22, 163, 74, 0.42);
+      color: #536173;
+    }
+
+    .question.is-favorite {
+      border-color: rgba(217, 119, 6, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.16);
+    }
+
+    .check-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+    }
+
+    .question-check {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      border: 2px solid var(--strong-line);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .question-check:hover { border-color: var(--blue); }
+
+    .question-check:checked {
+      border-color: var(--green);
+      background: var(--green);
+    }
+
+    .question-check:checked::after {
+      content: "";
+      display: block;
+      width: 7px;
+      height: 11px;
+      margin: 1px 0 0 6px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .question-check:focus-visible,
+    .answer-toggle:focus-visible,
+    .favorite-toggle:focus-visible,
+    .topic-test-button:focus-visible,
+    .button:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.2);
+      outline-offset: 2px;
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: var(--soft);
+      color: #334155;
+      font-weight: 850;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .question-main {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .question-text {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 760;
+    }
+
+    .tag-easy {
+      border-color: rgba(22, 163, 74, 0.28);
+      background: rgba(22, 163, 74, 0.09);
+      color: #15803d;
+    }
+
+    .tag-medium {
+      border-color: rgba(217, 119, 6, 0.32);
+      background: rgba(217, 119, 6, 0.1);
+      color: #b45309;
+    }
+
+    .answer-toggle {
+      width: 92px;
+      padding: 0 10px;
+      color: var(--blue);
+      border-color: rgba(37, 99, 235, 0.34);
+      background: rgba(37, 99, 235, 0.05);
+      white-space: nowrap;
+    }
+
+    .answer-toggle[aria-expanded="true"] {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .favorite-toggle {
+      width: 42px;
+      padding: 0;
+      font-size: 1rem;
+      color: #9ca3af;
+    }
+
+    .favorite-toggle::before { content: "☆"; }
+
+    .question.is-favorite .favorite-toggle {
+      border-color: rgba(217, 119, 6, 0.42);
+      background: rgba(217, 119, 6, 0.1);
+      color: var(--amber);
+    }
+
+    .question.is-favorite .favorite-toggle::before { content: "★"; }
+
+    .answer-panel {
+      grid-column: 3 / -1;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid var(--line);
+      overflow-wrap: anywhere;
+    }
+
+    .answer-panel a {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 18px;
+      border: 1px dashed var(--strong-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state.is-visible { display: block; }
+
+    .favorite-test-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-top: 26px;
+      padding: 18px;
+      border: 1px solid rgba(217, 119, 6, 0.34);
+      border-left: 5px solid var(--amber);
+      border-radius: 8px;
+      background: rgba(255, 251, 235, 0.78);
+    }
+
+    .favorite-test-kicker {
+      color: #92400e;
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .favorite-test-panel h2 {
+      margin: 3px 0 0;
+      font-size: 1.18rem;
+      letter-spacing: 0;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    footer a {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 1040px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .question { grid-template-columns: 34px 72px minmax(0, 1fr) 92px 42px; }
+      .favorite-counter { margin-left: 0; }
+    }
+
+    @media (max-width: 680px) {
+      .page { width: min(100% - 20px, 1120px); padding-top: 18px; }
+      h1 { font-size: 1.85rem; }
+      .stats,
+      .nav-grid,
+      .toolbar,
+      .favorite-test-panel { grid-template-columns: 1fr; }
+      .toolbar { position: static; display: grid; }
+      .search,
+      .button { width: 100%; }
+      summary { grid-template-columns: auto minmax(0, 1fr); }
+      summary::after { grid-column: 1 / -1; width: 100%; }
+      .topic-side { grid-column: 1 / -1; margin-right: 0; flex-wrap: wrap; justify-content: flex-start; }
+      .question {
+        grid-template-columns: 34px minmax(0, 1fr) 82px 42px;
+        gap: 7px 10px;
+      }
+      .question-number { grid-column: 2; }
+      .question-main { grid-column: 2 / -1; grid-row: 2; }
+      .answer-toggle { grid-column: 3; grid-row: 1; width: 82px; }
+      .favorite-toggle { grid-column: 4; grid-row: 1; }
+      .answer-panel { grid-column: 1 / -1; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .toolbar, .nav-grid, .answer-toggle, .topic-test-button, .favorite-test-panel { display: none; }
+      .hero { padding-top: 0; }
+      .topic { box-shadow: none; break-inside: avoid; }
+      details { display: block; }
+      details:not([open]) .topic-content { display: block; }
+      summary::after { display: none; }
+      .question { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body data-total-questions="18">
+  <main class="page">
+    <header class="hero">
+      <div class="hero-main">
+        <span class="eyebrow">CodeJeet / Tinkoff</span>
+        <h1>Алгоритмическая секция</h1>
+        <p class="lead">Чеклист задач из Tinkoff на CodeJeet: 18 LeetCode-задач с уровнями сложности, темами, кратким фокусом решения и self-check режимом.</p>
+      </div>
+      <div class="stats" aria-label="Сводка">
+        <div class="stat"><strong>18</strong><span>задач</span></div>
+        <div class="stat"><strong>7</strong><span>Easy / легкий</span></div>
+        <div class="stat"><strong>11</strong><span>Medium / средний</span></div>
+        <div class="stat"><strong>0</strong><span>Hard / сложный</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar" aria-label="Управление списком">
+      <input id="search" class="search" type="search" placeholder="Поиск по задачам" autocomplete="off">
+      <a class="button" href="index.html">На главную</a>
+      <button id="markAllChecks" class="button" type="button">Отметить все</button>
+      <button id="expandAll" class="button" type="button">Раскрыть все</button>
+      <button id="collapseAll" class="button" type="button">Свернуть все</button>
+      <button id="resetChecks" class="button" type="button">Сбросить чеклист</button>
+      <button id="openTests" class="button" type="button">Открыть тесты</button>
+      <span class="visible-counter">Показано: <strong id="visibleCount">18 из 18</strong></span>
+      <span class="check-counter">Отмечено: <strong id="checkedCount">0 из 18</strong></span>
+      <span class="favorite-counter">Понравилось: <strong id="favoriteCount">0 из 18</strong></span>
+    </div>
+
+    <nav id="navGrid" class="nav-grid" aria-label="Темы алгоритмической секции"></nav>
+
+    <div id="topicList" class="topic-list"></div>
+    <div id="emptyState" class="empty-state">Ничего не найдено. Попробуй другой запрос.</div>
+
+    <section class="favorite-test-panel" aria-label="Тест по задачам со звездочкой">
+      <div>
+        <span class="favorite-test-kicker">Тест по избранному</span>
+        <h2>Задачи со звездочкой</h2>
+      </div>
+      <button id="openFavoriteTests" class="button" type="button">Запустить тест · ★ <span id="favoriteTestCount">0</span></button>
+    </section>
+
+    <footer>
+      <a href="index.html">На главную</a> · Источник списка: <a href="https://codejeet.com/company/tinkoff">CodeJeet Tinkoff</a>. В файл перенесены названия, уровни, темы, acceptance и frequency; полные условия открывай на CodeJeet/LeetCode.
+    </footer>
+  </main>
+
+  <script>
+    const topicsData = [
+      {
+        id: 'topic-01',
+        index: '01',
+        title: 'Массивы и хеш-таблицы',
+        kicker: 'Array / Hash Table',
+        accent: '#2563eb',
+        summary: 'Базовые задачи на complement lookup, индексацию по значению и работу с ограничениями массива.',
+        tasks: [
+          {
+            id: 'alg-01',
+            number: '#A01',
+            leetcode: '#1',
+            title: 'Two Sum',
+            difficulty: 'Easy',
+            acceptance: '57.1%',
+            frequency: '100.0%',
+            topics: ['Array', 'Hash Table'],
+            url: 'https://codejeet.com/problem/two-sum',
+            answer: 'Идея: пройти массив один раз и хранить в HashMap уже увиденные значения с индексами. Для nums[i] ищем target - nums[i]. Время O(n), память O(n).'
+          },
+          {
+            id: 'alg-05',
+            number: '#A05',
+            leetcode: '#2605',
+            title: 'Form Smallest Number From Two Digit Arrays',
+            difficulty: 'Easy',
+            acceptance: '55.0%',
+            frequency: '89.1%',
+            topics: ['Array', 'Hash Table', 'Enumeration'],
+            url: 'https://codejeet.com/problem/form-smallest-number-from-two-digit-arrays',
+            answer: 'Идея: если есть общая цифра, ответ - минимальная общая. Иначе берем минимальные цифры из двух массивов и формируем меньшее из двух двузначных порядков. По сути O(n + m), при цифрах 1-9 можно считать O(1).'
+          },
+          {
+            id: 'alg-16',
+            number: '#A16',
+            leetcode: '#448',
+            title: 'Find All Numbers Disappeared in an Array',
+            difficulty: 'Easy',
+            acceptance: '63.8%',
+            frequency: '70.6%',
+            topics: ['Array', 'Hash Table'],
+            url: 'https://codejeet.com/problem/find-all-numbers-disappeared-in-an-array',
+            answer: 'Идея: использовать сам массив как разметку. Для каждого x пометить индекс abs(x) - 1 отрицательным; положительные позиции после прохода соответствуют отсутствующим числам. Время O(n), доп. память O(1), если не считать ответ.'
+          }
+        ]
+      },
+      {
+        id: 'topic-02',
+        index: '02',
+        title: 'Строки и два указателя',
+        kicker: 'String / Two Pointers',
+        accent: '#dc2626',
+        summary: 'Проверки подпоследовательности, палиндромов, окон и строковых инвариантов.',
+        tasks: [
+          {
+            id: 'alg-06',
+            number: '#A06',
+            leetcode: '#2609',
+            title: 'Find the Longest Balanced Substring of a Binary String',
+            difficulty: 'Easy',
+            acceptance: '46.4%',
+            frequency: '89.1%',
+            topics: ['String'],
+            url: 'https://codejeet.com/problem/find-the-longest-balanced-substring-of-a-binary-string',
+            answer: 'Идея: считать подряд идущие группы нулей и единиц. Для каждой пары 0...01...1 кандидат равен 2 * min(countZero, countOne). Время O(n), память O(1).'
+          },
+          {
+            id: 'alg-10',
+            number: '#A10',
+            leetcode: '#392',
+            title: 'Is Subsequence',
+            difficulty: 'Easy',
+            acceptance: '48.9%',
+            frequency: '81.5%',
+            topics: ['Two Pointers', 'String', 'Dynamic Programming'],
+            url: 'https://codejeet.com/problem/is-subsequence',
+            answer: 'Идея: два указателя. Двигаем указатель по s только при совпадении с текущим символом t. Если дошли до конца s, подпоследовательность найдена. Время O(|t|), память O(1).'
+          },
+          {
+            id: 'alg-14',
+            number: '#A14',
+            leetcode: '#3',
+            title: 'Longest Substring Without Repeating Characters',
+            difficulty: 'Medium',
+            acceptance: '38.5%',
+            frequency: '70.6%',
+            topics: ['Hash Table', 'String', 'Sliding Window'],
+            url: 'https://codejeet.com/problem/longest-substring-without-repeating-characters',
+            answer: 'Идея: sliding window и HashMap последней позиции символа. При повторе двигаем left правее прошлой позиции, обновляем максимум длины. Время O(n), память O(k) по алфавиту.'
+          },
+          {
+            id: 'alg-15',
+            number: '#A15',
+            leetcode: '#5',
+            title: 'Longest Palindromic Substring',
+            difficulty: 'Medium',
+            acceptance: '37.4%',
+            frequency: '70.6%',
+            topics: ['Two Pointers', 'String', 'Dynamic Programming'],
+            url: 'https://codejeet.com/problem/longest-palindromic-substring',
+            answer: 'Идея: expand around center для каждого символа и промежутка между символами. Обновляем лучший интервал. Время O(n^2), память O(1). Можно упомянуть DP или Manacher как альтернативы.'
+          },
+          {
+            id: 'alg-17',
+            number: '#A17',
+            leetcode: '#125',
+            title: 'Valid Palindrome',
+            difficulty: 'Easy',
+            acceptance: '52.8%',
+            frequency: '70.6%',
+            topics: ['Two Pointers', 'String'],
+            url: 'https://codejeet.com/problem/valid-palindrome',
+            answer: 'Идея: два указателя с пропуском не буквенно-цифровых символов и сравнением в одном регистре. Время O(n), память O(1).'
+          }
+        ]
+      },
+      {
+        id: 'topic-03',
+        index: '03',
+        title: 'Бинарный поиск и окно',
+        kicker: 'Binary Search / Sliding Window',
+        accent: '#16a34a',
+        summary: 'Задачи, где важно аккуратно удерживать границы, инвариант поиска или размер окна.',
+        tasks: [
+          {
+            id: 'alg-02',
+            number: '#A02',
+            leetcode: '#34',
+            title: 'Find First and Last Position of Element in Sorted Array',
+            difficulty: 'Medium',
+            acceptance: '48.4%',
+            frequency: '95.1%',
+            topics: ['Array', 'Binary Search'],
+            url: 'https://codejeet.com/problem/find-first-and-last-position-of-element-in-sorted-array',
+            answer: 'Идея: два бинарных поиска - lower bound для первой позиции target и upper/lower bound для позиции после последнего target. Время O(log n), память O(1).'
+          },
+          {
+            id: 'alg-08',
+            number: '#A08',
+            leetcode: '#1984',
+            title: 'Minimum Difference Between Highest and Lowest of K Scores',
+            difficulty: 'Easy',
+            acceptance: '66.2%',
+            frequency: '89.1%',
+            topics: ['Array', 'Sliding Window', 'Sorting'],
+            url: 'https://codejeet.com/problem/minimum-difference-between-highest-and-lowest-of-k-scores',
+            answer: 'Идея: отсортировать scores и пройти окном длины k. Для каждого окна разница равна nums[i + k - 1] - nums[i]. Время O(n log n), память зависит от сортировки.'
+          },
+          {
+            id: 'alg-13',
+            number: '#A13',
+            leetcode: '#33',
+            title: 'Search in Rotated Sorted Array',
+            difficulty: 'Medium',
+            acceptance: '44.1%',
+            frequency: '81.5%',
+            topics: ['Array', 'Binary Search'],
+            url: 'https://codejeet.com/problem/search-in-rotated-sorted-array',
+            answer: 'Идея: бинарный поиск с определением отсортированной половины. Если target попадает в отсортированную половину, сужаемся туда, иначе в другую. Время O(log n), память O(1).'
+          }
+        ]
+      },
+      {
+        id: 'topic-04',
+        index: '04',
+        title: 'Стек, список и дизайн',
+        kicker: 'Stack / Linked List / Design',
+        accent: '#0d9488',
+        summary: 'Задачи на состояние, вложенность, удаление через два указателя и проектирование простой структуры.',
+        tasks: [
+          {
+            id: 'alg-04',
+            number: '#A04',
+            leetcode: '#155',
+            title: 'Min Stack',
+            difficulty: 'Medium',
+            acceptance: '57.7%',
+            frequency: '89.1%',
+            topics: ['Stack', 'Design'],
+            url: 'https://codejeet.com/problem/min-stack',
+            answer: 'Идея: хранить в стеке пару value/currentMin или держать второй стек минимумов. Тогда push/pop/top/getMin работают за O(1), память O(n).'
+          },
+          {
+            id: 'alg-07',
+            number: '#A07',
+            leetcode: '#394',
+            title: 'Decode String',
+            difficulty: 'Medium',
+            acceptance: '62.3%',
+            frequency: '89.1%',
+            topics: ['String', 'Stack', 'Recursion'],
+            url: 'https://codejeet.com/problem/decode-string',
+            answer: 'Идея: стек чисел и текущих строк либо рекурсивный парсер. При [ сохраняем контекст, при ] повторяем текущий фрагмент и склеиваем с предыдущим. Время O(result length), память O(depth + result).'
+          },
+          {
+            id: 'alg-09',
+            number: '#A09',
+            leetcode: '#2694',
+            title: 'Event Emitter',
+            difficulty: 'Medium',
+            acceptance: '75.0%',
+            frequency: '81.5%',
+            topics: ['Design'],
+            url: 'https://codejeet.com/problem/event-emitter',
+            answer: 'Идея: Map eventName -> список callbacks. subscribe добавляет callback и возвращает объект с unsubscribe, который удаляет именно эту подписку. emit вызывает подписчиков в порядке добавления и возвращает массив результатов.'
+          },
+          {
+            id: 'alg-11',
+            number: '#A11',
+            leetcode: '#19',
+            title: 'Remove Nth Node From End of List',
+            difficulty: 'Medium',
+            acceptance: '51.0%',
+            frequency: '81.5%',
+            topics: ['Linked List', 'Two Pointers'],
+            url: 'https://codejeet.com/problem/remove-nth-node-from-end-of-list',
+            answer: 'Идея: dummy node и два указателя с расстоянием n. Когда fast дошел до конца, slow стоит перед удаляемым узлом. Удаляем slow.next. Время O(L), память O(1).'
+          },
+          {
+            id: 'alg-12',
+            number: '#A12',
+            leetcode: '#71',
+            title: 'Simplify Path',
+            difficulty: 'Medium',
+            acceptance: '50.0%',
+            frequency: '81.5%',
+            topics: ['String', 'Stack'],
+            url: 'https://codejeet.com/problem/simplify-path',
+            answer: 'Идея: split по / и стек директорий. Пустые части и . игнорируем, .. делает pop, обычное имя добавляем. Ответ - / + join(stack). Время O(n), память O(n).'
+          }
+        ]
+      },
+      {
+        id: 'topic-05',
+        index: '05',
+        title: 'Матрицы и обход графа',
+        kicker: 'Matrix / DFS',
+        accent: '#be123c',
+        summary: 'Grid-задачи, где нужно понимать соседей клетки, посещение и подсчет компонент.',
+        tasks: [
+          {
+            id: 'alg-03',
+            number: '#A03',
+            leetcode: '#200',
+            title: 'Number of Islands',
+            difficulty: 'Medium',
+            acceptance: '63.8%',
+            frequency: '95.1%',
+            topics: ['Array', 'Depth-First Search', 'Breadth-First Search', 'Union-Find', 'Matrix'],
+            url: 'https://codejeet.com/problem/number-of-islands',
+            answer: 'Идея: пройти grid, при встрече земли увеличивать счетчик и запускать DFS/BFS, чтобы пометить всю компоненту как посещенную. Время O(mn), память O(mn) в худшем случае для стека/очереди.'
+          },
+          {
+            id: 'alg-18',
+            number: '#A18',
+            leetcode: '#419',
+            title: 'Battleships in a Board',
+            difficulty: 'Medium',
+            acceptance: '77.4%',
+            frequency: '70.6%',
+            topics: ['Array', 'Depth-First Search', 'Matrix'],
+            url: 'https://codejeet.com/problem/battleships-in-a-board',
+            answer: 'Идея: считать только начало корабля - клетку X, у которой сверху и слева нет X. Тогда один проход, O(mn) времени и O(1) памяти, без изменения board.'
+          }
+        ]
+      }
+    ];
+
+    const flatTasks = topicsData.flatMap((topic) => topic.tasks.map((task) => Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, topicAccent: topic.accent }, task)));
+    const searchInput = document.querySelector('#search');
+    const navGrid = document.querySelector('#navGrid');
+    const topicList = document.querySelector('#topicList');
+    const visibleCount = document.querySelector('#visibleCount');
+    const checkedCount = document.querySelector('#checkedCount');
+    const favoriteCount = document.querySelector('#favoriteCount');
+    const resetChecks = document.querySelector('#resetChecks');
+    const markAllChecks = document.querySelector('#markAllChecks');
+    const expandAll = document.querySelector('#expandAll');
+    const collapseAll = document.querySelector('#collapseAll');
+    const openTestsButton = document.querySelector('#openTests');
+    const openFavoriteTestsButton = document.querySelector('#openFavoriteTests');
+    const favoriteTestCount = document.querySelector('#favoriteTestCount');
+    const emptyState = document.querySelector('#emptyState');
+    const totalCount = Number(document.body.dataset.totalQuestions);
+    const storageKey = 'algorithmic-section-checklist-v1';
+    const favoritesKey = 'algorithmic-section-favorites-v1';
+
+    let checkedTasks = loadSet(storageKey);
+    let favoriteTasks = loadSet(favoritesKey);
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function normalize(value) {
+      return value.toLocaleLowerCase('ru-RU');
+    }
+
+    function loadSet(key) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        return new Set(Array.isArray(saved) ? saved : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveSet(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(Array.from(value)));
+      } catch {
+      }
+    }
+
+    function difficultyLabel(value) {
+      if (value === 'Easy') return 'Easy / легкий';
+      if (value === 'Medium') return 'Medium / средний';
+      return 'Hard / сложный';
+    }
+
+    function difficultyClass(value) {
+      return value === 'Easy' ? 'tag-easy' : 'tag-medium';
+    }
+
+    function taskWord(count) {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return 'задача';
+      if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'задачи';
+      return 'задач';
+    }
+
+    function taskSearchText(task) {
+      return normalize([
+        task.number,
+        task.leetcode,
+        task.title,
+        task.difficulty,
+        difficultyLabel(task.difficulty),
+        task.topics.join(' '),
+        task.answer
+      ].join(' '));
+    }
+
+    function renderNav() {
+      navGrid.innerHTML = topicsData.map((topic) => `
+        <a class="nav-card" href="#${escapeHtml(topic.id)}" style="--accent: ${escapeHtml(topic.accent)};">
+          <span class="nav-index">${escapeHtml(topic.index)}</span>
+          <span class="nav-title">${escapeHtml(topic.title)}</span>
+          <span class="nav-meta">${topic.tasks.length} ${taskWord(topic.tasks.length)}</span>
+        </a>
+      `).join('');
+    }
+
+    function renderTopics() {
+      topicList.innerHTML = topicsData.map((topic) => `
+        <section class="topic" id="${escapeHtml(topic.id)}" data-total="${topic.tasks.length}" style="--accent: ${escapeHtml(topic.accent)};">
+          <details open>
+            <summary>
+              <span class="topic-marker">${escapeHtml(topic.index)}</span>
+              <span class="topic-heading">
+                <span class="topic-kicker">${escapeHtml(topic.kicker)}</span>
+                <span class="topic-title">${escapeHtml(topic.title)}</span>
+              </span>
+              <span class="topic-side">
+                <span class="difficulty-chip">${topic.tasks.length} ${taskWord(topic.tasks.length)}</span>
+                <span class="section-count">${topic.tasks.length} / ${topic.tasks.length}</span>
+                <button class="topic-test-button" type="button" data-test-topic="${escapeHtml(topic.id)}">Тест</button>
+              </span>
+            </summary>
+            <div class="topic-content">
+              <p class="topic-summary">${escapeHtml(topic.summary)}</p>
+              <ol class="questions">
+                ${topic.tasks.map(renderTask).join('')}
+              </ol>
+            </div>
+          </details>
+        </section>
+      `).join('');
+    }
+
+    function renderTask(task) {
+      const checked = checkedTasks.has(task.id);
+      const favorite = favoriteTasks.has(task.id);
+      return `
+        <li class="question ${checked ? 'is-done' : ''} ${favorite ? 'is-favorite' : ''}" data-task-id="${escapeHtml(task.id)}" data-search="${escapeHtml(taskSearchText(task))}">
+          <label class="check-wrap" aria-label="Отметить задачу ${escapeHtml(task.number)}">
+            <input class="question-check" type="checkbox" ${checked ? 'checked' : ''}>
+          </label>
+          <span class="question-number">${escapeHtml(task.number)}</span>
+          <span class="question-main">
+            <span class="question-text">${escapeHtml(task.title)}</span>
+            <span class="meta-row">
+              <span class="tag ${difficultyClass(task.difficulty)}">${difficultyLabel(task.difficulty)}</span>
+              <span class="tag">LeetCode ${escapeHtml(task.leetcode)}</span>
+              <span class="tag">Acceptance ${escapeHtml(task.acceptance)}</span>
+              <span class="tag">Frequency ${escapeHtml(task.frequency)}</span>
+              ${task.topics.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+            </span>
+          </span>
+          <button class="answer-toggle" type="button" aria-expanded="false" aria-controls="${escapeHtml(task.id)}-answer">Подход</button>
+          <button class="favorite-toggle" type="button" aria-label="Отметить задачу ${escapeHtml(task.number)} как понравившуюся" aria-pressed="${String(favorite)}"></button>
+          <div class="answer-panel" id="${escapeHtml(task.id)}-answer" hidden>
+            ${escapeHtml(task.answer)} <a href="${escapeHtml(task.url)}">Открыть задачу</a>.
+          </div>
+        </li>
+      `;
+    }
+
+    function updateProgress() {
+      checkedCount.textContent = `${checkedTasks.size} из ${totalCount}`;
+      favoriteCount.textContent = `${favoriteTasks.size} из ${totalCount}`;
+      favoriteTestCount.textContent = String(favoriteTasks.size);
+      openFavoriteTestsButton.disabled = favoriteTasks.size === 0;
+    }
+
+    function applySearch() {
+      const term = normalize(searchInput.value.trim());
+      let visibleTasks = 0;
+      let visibleTopics = 0;
+
+      document.querySelectorAll('.topic').forEach((topic) => {
+        const tasks = Array.from(topic.querySelectorAll('.question'));
+        let topicVisibleTasks = 0;
+
+        tasks.forEach((task) => {
+          const matches = !term || task.dataset.search.includes(term);
+          task.hidden = !matches;
+          if (matches) {
+            topicVisibleTasks += 1;
+            visibleTasks += 1;
+          }
+        });
+
+        topic.hidden = topicVisibleTasks === 0;
+        if (topicVisibleTasks > 0) visibleTopics += 1;
+        topic.querySelector('.section-count').textContent = `${topicVisibleTasks} / ${topic.dataset.total}`;
+      });
+
+      visibleCount.textContent = `${visibleTasks} из ${totalCount}`;
+      emptyState.classList.toggle('is-visible', visibleTasks === 0);
+      document.body.dataset.visibleTopics = String(visibleTopics);
+    }
+
+    function bindEvents() {
+      topicList.addEventListener('change', (event) => {
+        const checkbox = event.target.closest('.question-check');
+        if (!checkbox) return;
+        const task = checkbox.closest('.question');
+        const id = task.dataset.taskId;
+
+        if (checkbox.checked) {
+          checkedTasks.add(id);
+        } else {
+          checkedTasks.delete(id);
+        }
+
+        task.classList.toggle('is-done', checkbox.checked);
+        saveSet(storageKey, checkedTasks);
+        updateProgress();
+      });
+
+      topicList.addEventListener('click', (event) => {
+        const testButton = event.target.closest('[data-test-topic]');
+        if (testButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          openTestWindow(testButton.dataset.testTopic);
+          return;
+        }
+
+        const answerButton = event.target.closest('.answer-toggle');
+        if (answerButton) {
+          const isOpen = answerButton.getAttribute('aria-expanded') !== 'true';
+          answerButton.setAttribute('aria-expanded', String(isOpen));
+          answerButton.textContent = isOpen ? 'Скрыть' : 'Подход';
+          document.getElementById(answerButton.getAttribute('aria-controls')).hidden = !isOpen;
+          return;
+        }
+
+        const favoriteButton = event.target.closest('.favorite-toggle');
+        if (favoriteButton) {
+          const task = favoriteButton.closest('.question');
+          const id = task.dataset.taskId;
+          const isFavorite = !favoriteTasks.has(id);
+
+          if (isFavorite) {
+            favoriteTasks.add(id);
+          } else {
+            favoriteTasks.delete(id);
+          }
+
+          task.classList.toggle('is-favorite', isFavorite);
+          favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+          saveSet(favoritesKey, favoriteTasks);
+          updateProgress();
+        }
+      });
+
+      searchInput.addEventListener('input', applySearch);
+
+      markAllChecks.addEventListener('click', () => {
+        flatTasks.forEach((task) => checkedTasks.add(task.id));
+        document.querySelectorAll('.question').forEach((task) => {
+          task.classList.add('is-done');
+          task.querySelector('.question-check').checked = true;
+        });
+        saveSet(storageKey, checkedTasks);
+        updateProgress();
+      });
+
+      resetChecks.addEventListener('click', () => {
+        checkedTasks = new Set();
+        document.querySelectorAll('.question').forEach((task) => {
+          task.classList.remove('is-done');
+          task.querySelector('.question-check').checked = false;
+        });
+        saveSet(storageKey, checkedTasks);
+        updateProgress();
+      });
+
+      expandAll.addEventListener('click', () => {
+        document.querySelectorAll('.topic details').forEach((details) => details.open = true);
+      });
+
+      collapseAll.addEventListener('click', () => {
+        document.querySelectorAll('.topic details').forEach((details) => details.open = false);
+      });
+
+      openTestsButton.addEventListener('click', () => openTestWindow('all'));
+
+      openFavoriteTestsButton.addEventListener('click', () => {
+        const favoriteList = collectFavoriteTasks();
+        if (!favoriteList[0].tasks.length) return;
+        openTestWindow('favorite-tasks', favoriteList);
+      });
+    }
+
+    function collectFavoriteTasks() {
+      const tasks = flatTasks.filter((task) => favoriteTasks.has(task.id));
+      return [{
+        id: 'favorite-tasks',
+        index: '★',
+        title: 'Задачи со звездочкой',
+        accent: '#d97706',
+        tasks
+      }];
+    }
+
+    function scopedTestTopics(initialTopicId, providedTopics) {
+      if (providedTopics) return providedTopics;
+      if (initialTopicId === 'all') return topicsData;
+      return topicsData.filter((topic) => topic.id === initialTopicId);
+    }
+
+    function openTestWindow(initialTopicId, providedTopics) {
+      const testTopics = scopedTestTopics(initialTopicId, providedTopics);
+      const popup = window.open('', 'algorithmic-section-tests', 'width=1120,height=860,scrollbars=yes,resizable=yes');
+
+      if (!popup) {
+        alert('Браузер заблокировал окно теста. Разреши pop-up для этого файла.');
+        return;
+      }
+
+      popup.document.open();
+      popup.document.write(buildTestWindowHtml(testTopics, initialTopicId));
+      popup.document.close();
+    }
+
+    function buildTestWindowHtml(testTopics, initialTopicId) {
+      const topicsJson = JSON.stringify(testTopics).replace(/</g, '\\u003c');
+      const title = initialTopicId === 'favorite-tasks' ? 'Тест по избранным задачам' : 'Self-check по алгоритмам';
+
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --rose: #be123c;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0) 320px), var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+    button, select { font: inherit; }
+    .page { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 46px; }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 2rem; line-height: 1.1; letter-spacing: 0; }
+    .lead { margin: 8px 0 0; color: var(--muted); max-width: 720px; }
+    .close-button,
+    .control-button,
+    .action-button {
+      min-height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .close-button:hover,
+    .control-button:hover,
+    .action-button:hover { border-color: #94a3b8; background: #f8fafc; }
+    .control-bar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      gap: 8px;
+      align-items: center;
+      margin: 18px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+    .topic-select {
+      min-height: 40px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 750;
+    }
+    .progress-line {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .progress-copy {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width 180ms ease;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .topic-rail {
+      display: grid;
+      gap: 8px;
+      position: sticky;
+      top: 12px;
+    }
+    .topic-tab {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+    }
+    .topic-tab.is-active { border-color: color-mix(in srgb, var(--accent), white 38%); background: color-mix(in srgb, var(--accent), white 94%); }
+    .topic-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent), white 86%);
+      color: var(--accent);
+      font-weight: 900;
+    }
+    .topic-name { font-weight: 850; overflow-wrap: anywhere; }
+    .topic-count { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+    .cards { display: grid; gap: 10px; }
+    .test-card {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .test-card[data-status="known"] { background: linear-gradient(90deg, rgba(22, 163, 74, 0.08), #fff 46%); }
+    .test-card[data-status="review"] { background: linear-gradient(90deg, rgba(217, 119, 6, 0.1), #fff 46%); }
+    .card-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+    }
+    .task-title { margin: 0; font-size: 1.08rem; line-height: 1.3; letter-spacing: 0; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      width: fit-content;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 780;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .prompt { margin: 0; color: var(--muted); }
+    .answer {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #334155;
+    }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .action-primary { border-color: rgba(22, 163, 74, 0.4); background: rgba(22, 163, 74, 0.08); color: #15803d; }
+    .action-review { border-color: rgba(217, 119, 6, 0.4); background: rgba(217, 119, 6, 0.08); color: #b45309; }
+    .empty { padding: 18px; border: 1px dashed var(--strong-line); border-radius: 8px; background: #fff; color: var(--muted); text-align: center; }
+    [hidden] { display: none !important; }
+    @media (max-width: 920px) {
+      .topbar,
+      .control-bar,
+      .layout { grid-template-columns: 1fr; }
+      .topic-rail { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .page { width: min(100% - 20px, 1060px); padding-top: 18px; }
+      h1 { font-size: 1.65rem; }
+      .topic-rail { grid-template-columns: 1fr; }
+      .close-button,
+      .control-button,
+      .action-button { width: 100%; }
+      .card-head { grid-template-columns: 1fr; }
+      .card-actions { display: grid; grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="lead">Вспомни решение вслух, затем открой подход и отметь статус.</p>
+      </div>
+      <button id="closeWindow" class="close-button" type="button">Закрыть</button>
+    </header>
+
+    <section class="control-bar" aria-label="Управление тестами">
+      <select id="topicSelect" class="topic-select" aria-label="Тема теста"></select>
+      <button id="reviewButton" class="control-button" type="button" aria-pressed="false">Только повтор</button>
+      <button id="resetProgress" class="control-button" type="button">Сбросить прогресс</button>
+      <button id="showAllAnswers" class="control-button" type="button" aria-pressed="false">Показать подходы</button>
+    </section>
+
+    <div class="progress-line">
+      <div class="progress-copy">
+        <span id="progressText">0 знаю · 0 повторить · 0 без статуса</span>
+        <span id="scopeText">Все задачи</span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><span id="progressFill" class="progress-fill"></span></div>
+    </div>
+
+    <div class="layout">
+      <aside id="topicRail" class="topic-rail" aria-label="Темы"></aside>
+      <section id="cards" class="cards" aria-live="polite"></section>
+    </div>
+  </main>
+
+  <script>
+    const testTopics = ${topicsJson};
+    const initialTopicId = ${JSON.stringify(initialTopicId)};
+    const storageKey = 'algorithmic-section-test-progress-v1';
+    let currentTopicId = testTopics.some(function(topic) { return topic.id === initialTopicId; }) ? initialTopicId : 'all';
+    let onlyReview = false;
+    let showAnswers = false;
+    let progress = loadJson(storageKey, {});
+
+    const topicSelect = document.querySelector('#topicSelect');
+    const topicRail = document.querySelector('#topicRail');
+    const cards = document.querySelector('#cards');
+    const progressText = document.querySelector('#progressText');
+    const progressFill = document.querySelector('#progressFill');
+    const scopeText = document.querySelector('#scopeText');
+    const reviewButton = document.querySelector('#reviewButton');
+    const resetProgress = document.querySelector('#resetProgress');
+    const showAllAnswers = document.querySelector('#showAllAnswers');
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function loadJson(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || 'null');
+        return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+      }
+    }
+
+    function difficultyLabel(value) {
+      if (value === 'Easy') return 'Easy / легкий';
+      if (value === 'Medium') return 'Medium / средний';
+      return 'Hard / сложный';
+    }
+
+    function flatItems() {
+      return testTopics.flatMap(function(topic) {
+        return topic.tasks.map(function(task) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, topicAccent: topic.accent }, task);
+        });
+      });
+    }
+
+    function scopeTopics() {
+      return currentTopicId === 'all' ? testTopics : testTopics.filter(function(topic) { return topic.id === currentTopicId; });
+    }
+
+    function visibleItems() {
+      let items = scopeTopics().flatMap(function(topic) {
+        return topic.tasks.map(function(task) {
+          return Object.assign({ topicId: topic.id, topicTitle: topic.title, topicIndex: topic.index, topicAccent: topic.accent }, task);
+        });
+      });
+
+      if (onlyReview) {
+        items = items.filter(function(item) {
+          return progress[item.id] && progress[item.id].status === 'review';
+        });
+      }
+
+      return items;
+    }
+
+    function currentScopeTitle() {
+      if (currentTopicId === 'all') return 'Все задачи';
+      const topic = testTopics.find(function(item) { return item.id === currentTopicId; });
+      return topic ? topic.title : 'Все задачи';
+    }
+
+    function renderControls() {
+      topicSelect.innerHTML = '<option value="all">Все темы</option>' + testTopics.map(function(topic) {
+        return '<option value="' + escapeHtml(topic.id) + '">' + escapeHtml(topic.index) + '. ' + escapeHtml(topic.title) + '</option>';
+      }).join('');
+      topicSelect.value = currentTopicId;
+
+      topicRail.innerHTML = testTopics.map(function(topic) {
+        const total = topic.tasks.length;
+        const known = topic.tasks.filter(function(task) {
+          return progress[task.id] && progress[task.id].status === 'known';
+        }).length;
+        const review = topic.tasks.filter(function(task) {
+          return progress[task.id] && progress[task.id].status === 'review';
+        }).length;
+
+        return '<button class="topic-tab ' + (topic.id === currentTopicId ? 'is-active' : '') + '" type="button" data-topic-id="' + escapeHtml(topic.id) + '" style="--accent: ' + escapeHtml(topic.accent) + '">' +
+          '<span class="topic-index">' + escapeHtml(topic.index) + '</span>' +
+          '<span class="topic-name">' + escapeHtml(topic.title) + '</span>' +
+          '<span class="topic-count">' + known + '/' + total + (review ? ' · ' + review : '') + '</span>' +
+        '</button>';
+      }).join('');
+
+      reviewButton.setAttribute('aria-pressed', String(onlyReview));
+      showAllAnswers.setAttribute('aria-pressed', String(showAnswers));
+      reviewButton.style.borderColor = onlyReview ? 'rgba(217, 119, 6, 0.52)' : '';
+      showAllAnswers.style.borderColor = showAnswers ? 'rgba(37, 99, 235, 0.52)' : '';
+    }
+
+    function renderCards() {
+      const items = visibleItems();
+
+      if (!items.length) {
+        cards.innerHTML = '<div class="empty">Нет задач для текущего фильтра.</div>';
+        updateProgressLine();
+        renderControls();
+        return;
+      }
+
+      cards.innerHTML = items.map(function(item) {
+        const state = progress[item.id] || {};
+        return '<article class="test-card" data-id="' + escapeHtml(item.id) + '" data-status="' + escapeHtml(state.status || '') + '" style="--accent: ' + escapeHtml(item.topicAccent) + '">' +
+          '<div class="card-head">' +
+            '<div>' +
+              '<div class="tags">' +
+                '<span class="tag">' + escapeHtml(item.number) + '</span>' +
+                '<span class="tag">LeetCode ' + escapeHtml(item.leetcode) + '</span>' +
+                '<span class="tag">' + escapeHtml(difficultyLabel(item.difficulty)) + '</span>' +
+                '<span class="tag">' + escapeHtml(item.topicTitle) + '</span>' +
+              '</div>' +
+              '<h2 class="task-title">' + escapeHtml(item.title) + '</h2>' +
+            '</div>' +
+            '<span class="tag">' + (state.status === 'known' ? 'знаю' : state.status === 'review' ? 'повторить' : 'без статуса') + '</span>' +
+          '</div>' +
+          '<p class="prompt">Проговори условие, ключевой инвариант, сложность и крайние случаи.</p>' +
+          '<div class="answer" ' + (showAnswers ? '' : 'hidden') + '>' + escapeHtml(item.answer) + '</div>' +
+          '<div class="card-actions">' +
+            '<button class="action-button" type="button" data-action="toggle-answer">' + (showAnswers ? 'Скрыть подход' : 'Показать подход') + '</button>' +
+            '<button class="action-button action-primary" type="button" data-action="known">Знаю</button>' +
+            '<button class="action-button action-review" type="button" data-action="review">На повтор</button>' +
+            '<button class="action-button" type="button" data-action="clear">Сброс</button>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+
+      updateProgressLine();
+      renderControls();
+    }
+
+    function updateProgressLine() {
+      const items = visibleItems();
+      const known = items.filter(function(item) {
+        return progress[item.id] && progress[item.id].status === 'known';
+      }).length;
+      const review = items.filter(function(item) {
+        return progress[item.id] && progress[item.id].status === 'review';
+      }).length;
+      const remaining = Math.max(items.length - known - review, 0);
+      const percent = items.length ? Math.round((known / items.length) * 100) : 0;
+
+      progressText.textContent = known + ' знаю · ' + review + ' повторить · ' + remaining + ' без статуса';
+      scopeText.textContent = currentScopeTitle();
+      progressFill.style.width = percent + '%';
+    }
+
+    function setStatus(card, status) {
+      const id = card.dataset.id;
+      progress[id] = {
+        status,
+        updatedAt: new Date().toISOString()
+      };
+      saveJson(storageKey, progress);
+      renderCards();
+    }
+
+    function clearStatus(card) {
+      delete progress[card.dataset.id];
+      saveJson(storageKey, progress);
+      renderCards();
+    }
+
+    document.querySelector('#closeWindow').addEventListener('click', function() {
+      window.close();
+    });
+
+    topicSelect.addEventListener('change', function() {
+      currentTopicId = topicSelect.value;
+      renderCards();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    topicRail.addEventListener('click', function(event) {
+      const button = event.target.closest('[data-topic-id]');
+      if (!button) return;
+      currentTopicId = button.dataset.topicId;
+      topicSelect.value = currentTopicId;
+      renderCards();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    cards.addEventListener('click', function(event) {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const card = button.closest('.test-card');
+      const action = button.dataset.action;
+
+      if (action === 'toggle-answer') {
+        const answer = card.querySelector('.answer');
+        answer.hidden = !answer.hidden;
+        button.textContent = answer.hidden ? 'Показать подход' : 'Скрыть подход';
+      }
+      if (action === 'known') setStatus(card, 'known');
+      if (action === 'review') setStatus(card, 'review');
+      if (action === 'clear') clearStatus(card);
+    });
+
+    reviewButton.addEventListener('click', function() {
+      onlyReview = !onlyReview;
+      renderCards();
+    });
+
+    showAllAnswers.addEventListener('click', function() {
+      showAnswers = !showAnswers;
+      renderCards();
+    });
+
+    resetProgress.addEventListener('click', function() {
+      progress = {};
+      saveJson(storageKey, progress);
+      renderCards();
+    });
+
+    renderControls();
+    renderCards();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    renderNav();
+    renderTopics();
+    bindEvents();
+    applySearch();
+    updateProgress();
+  </script>
+</body>
+</html>

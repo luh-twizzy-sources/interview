@@ -368,10 +368,11 @@
       <div>
         <span class="eyebrow">Java Interview Prep</span>
         <h1>Единый сайт для подготовки</h1>
-        <p class="lead">Все вопросы из PDF собраны в четыре раздела с поиском, чеклистом, избранным, ответами и тестовым режимом.</p>
+        <p class="lead">Все вопросы из PDF собраны в четыре раздела с поиском, чеклистом, избранным, ответами и тестовым режимом. Отдельно добавлена алгоритмическая секция по Tinkoff.</p>
       </div>
       <div class="top-actions" aria-label="Быстрые действия">
         <a class="button button-primary" href="java_core_questions.html">Начать с Java Core</a>
+        <a class="button" href="algorithmic_section.html">Алгоритмика</a>
         <a class="button" href="Вопросы_для_собеседования_Java.pdf">Открыть PDF</a>
       </div>
     </header>
@@ -383,7 +384,7 @@
       </div>
       <div class="summary">
         <strong>530</strong>
-        <span>карточек в разделах с учетом пересечений</span>
+        <span>карточек в PDF-разделах с учетом пересечений</span>
       </div>
       <div class="summary">
         <strong id="totalDone">0</strong>
@@ -391,14 +392,14 @@
       </div>
       <div class="summary">
         <strong id="totalFavorites">0</strong>
-        <span>вопросов со звездочкой на этом домене</span>
+        <span>вопросов/задач со звездочкой на этом домене</span>
       </div>
     </section>
 
     <section aria-labelledby="modulesTitle">
       <div class="section-head">
         <div>
-          <h2 id="modulesTitle">Разделы</h2>
+          <h2 id="modulesTitle">Разделы и секции</h2>
           <p>Прогресс читается из тех же ключей localStorage, что и внутри HTML-файлов.</p>
         </div>
       </div>
@@ -460,7 +461,7 @@
         href: 'hibernate_jpa_database_questions.html',
         accent: '#0d9488',
         questions: 84,
-        topics: 8,
+        topics: 5,
         range: '#78-#516',
         checklistKey: 'pdf-hibernate-jpa-db-checklist-v1',
         favoritesKey: 'pdf-hibernate-jpa-db-favorites-v1',
@@ -490,6 +491,19 @@
         favoritesKey: 'pdf-remaining-topics-favorites-v1',
         testKey: 'pdf-remaining-topics-test-progress-v1',
         description: 'Microservices, resilience, Kafka, messaging, Docker, Kubernetes, REST, HTTP headers, status codes и API versioning.'
+      },
+      {
+        title: 'Алгоритмическая секция',
+        href: 'algorithmic_section.html',
+        accent: '#7c3aed',
+        questions: 18,
+        topics: 5,
+        range: 'CodeJeet/Tinkoff',
+        unit: 'задач',
+        checklistKey: 'algorithmic-section-checklist-v1',
+        favoritesKey: 'algorithmic-section-favorites-v1',
+        testKey: 'algorithmic-section-test-progress-v1',
+        description: '18 LeetCode-задач Tinkoff с CodeJeet: массивы, строки, два указателя, binary search, stack/design, linked list и matrix/DFS.'
       }
     ];
 
@@ -539,6 +553,7 @@
         const favorites = loadArray(item.favoritesKey).length;
         const tests = testStats(item.testKey);
         const percent = formatPercent(done, item.questions);
+        const unit = item.unit || 'вопросов';
         doneSum += done;
         favoriteSum += favorites;
 
@@ -548,7 +563,7 @@
               <div>
                 <h3 class="module-title">${item.title}</h3>
                 <div class="module-meta">
-                  <span class="tag">${item.questions} вопросов</span>
+                  <span class="tag">${item.questions} ${unit}</span>
                   <span class="tag">${item.topics} тем</span>
                   <span class="tag">${item.range}</span>
                 </div>
