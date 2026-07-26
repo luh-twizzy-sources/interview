@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
 
@@ -156,37 +155,7 @@ function parsePdfSection(section) {
   return entries;
 }
 
-function parseAlgorithmicSection() {
-  const html = read('algorithmic_section.html');
-  const literal = extractDelimited(html, 'const topicsData =', '[', ']');
-  const topics = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
-
-  return topics.flatMap((topic) => topic.tasks.map((task) => ({
-    id: task.id,
-    sourceId: task.id,
-    sourceNumber: task.number,
-    sourceType: 'algorithm',
-    moduleKey: 'algorithmic',
-    moduleTitle: 'Алгоритмическая секция',
-    topicId: topic.id,
-    topicTitle: topic.title,
-    topicKicker: topic.kicker,
-    difficulty: task.difficulty,
-    question: `${task.title} (${task.leetcode})`,
-    answer: task.answer,
-    href: task.url,
-    accent: topic.accent,
-    leetcode: task.leetcode,
-    acceptance: task.acceptance,
-    frequency: task.frequency,
-    tags: task.topics
-  })));
-}
-
-const questionBank = [
-  ...pdfSections.flatMap(parsePdfSection),
-  ...parseAlgorithmicSection()
-];
+const questionBank = pdfSections.flatMap(parsePdfSection);
 
 const pdfQuestions = new Set(questionBank.filter((item) => item.sourceType === 'pdf').map((item) => item.sourceId));
 const missingPdf = [];
@@ -208,4 +177,3 @@ fs.writeFileSync(path.join(root, 'interview_question_bank.js'), output);
 
 console.log(`Generated interview_question_bank.js with ${questionBank.length} entries.`);
 console.log(`PDF unique questions: ${pdfQuestions.size}/516.`);
-console.log(`Algorithmic tasks: ${questionBank.filter((item) => item.sourceType === 'algorithm').length}.`);

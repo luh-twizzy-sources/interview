@@ -194,6 +194,181 @@
       font-size: 0.92rem;
     }
 
+    .stats-panel {
+      margin-top: 14px;
+      padding: 16px;
+    }
+
+    .stats-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-box {
+      min-height: 88px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .stat-box strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.45rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .stat-box span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .set-panel {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .set-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 850;
+    }
+
+    .set-slots {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .set-slot {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .set-slot.is-filled {
+      border-color: rgba(37, 99, 235, 0.35);
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+    }
+
+    .reward-card {
+      display: grid;
+      gap: 5px;
+      margin-top: 14px;
+      padding: 13px;
+      border: 1px solid rgba(217, 119, 6, 0.28);
+      border-radius: 8px;
+      background: #fffbeb;
+      color: #713f12;
+    }
+
+    .reward-card[hidden] { display: none; }
+
+    .reward-card strong {
+      color: #713f12;
+      font-size: 1rem;
+    }
+
+    .reward-card span {
+      color: #854d0e;
+      font-size: 0.88rem;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .state-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .state-tools strong {
+      display: block;
+      color: var(--ink);
+      font-size: 0.94rem;
+    }
+
+    .state-tools span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .state-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .history-item strong {
+      display: block;
+      color: var(--ink);
+      font-size: 0.93rem;
+    }
+
+    .history-item span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
     .weights {
       display: grid;
       gap: 10px;
@@ -530,11 +705,15 @@
       .setup-grid,
       .session-head,
       .interview-grid,
+      .stats-head,
+      .state-tools,
       .report-head {
         grid-template-columns: 1fr;
       }
 
       .top-actions { justify-content: flex-start; }
+      .state-actions { justify-content: flex-start; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .question-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
@@ -544,6 +723,7 @@
       .button,
       .confidence-button { width: 100%; }
       .confidence-row,
+      .stats-grid,
       .question-rail {
         grid-template-columns: 1fr;
       }
@@ -559,7 +739,7 @@
       <div>
         <span class="eyebrow">Interview Simulator</span>
         <h1>Имитация реального Java-интервью</h1>
-        <p class="lead">Сессия собирается из локальных PDF-вопросов и отдельной алгоритмической секции с пропорциями, близкими к техническому Java backend интервью.</p>
+        <p class="lead">Сессия собирается из локальных PDF-вопросов с пропорциями, близкими к техническому Java backend интервью.</p>
       </div>
       <div class="top-actions" aria-label="Быстрые действия">
         <a class="button" href="index.html">На главную</a>
@@ -570,7 +750,7 @@
     <section class="setup-grid" aria-labelledby="setupTitle">
       <div class="panel">
         <h2 id="setupTitle">Пропорции интервью</h2>
-        <p class="panel-note">Рабочая модель для технической части middle Java backend интервью. В конкретной компании веса могут сдвигаться под стек команды.</p>
+        <p class="panel-note">Рабочая модель для технической части middle Java backend интервью. Вопросы идут блоками по этому порядку, внутри блока - по порядку тем.</p>
         <div id="weights" class="weights"></div>
       </div>
 
@@ -602,6 +782,38 @@
       </div>
     </section>
 
+    <section class="panel stats-panel" aria-labelledby="statsTitle">
+      <div class="stats-head">
+        <div>
+          <h2 id="statsTitle">Статистика сетов</h2>
+          <p class="panel-note">Один сет - пять завершенных интервью. Статистика считается после кнопки «Завершить и отчет».</p>
+        </div>
+        <button id="resetStats" class="button button-danger" type="button">Сбросить статистику</button>
+      </div>
+      <div id="statsGrid" class="stats-grid"></div>
+      <div class="set-panel">
+        <div class="set-head">
+          <span id="setTitle">Сет #1</span>
+          <span id="setCount">0 / 5</span>
+        </div>
+        <div id="setSlots" class="set-slots" aria-label="Прогресс текущего сета"></div>
+        <div class="weight-track"><div id="setProgressFill" class="weight-fill" style="--value: 0%"></div></div>
+      </div>
+      <div id="rewardCard" class="reward-card" hidden></div>
+      <div id="historyList" class="history-list"></div>
+      <div class="state-tools">
+        <div>
+          <strong id="archiveInfo">Архив пуст</strong>
+          <span>Сохраняются полные вопросы, ответы, самооценка, эталоны и история сетов.</span>
+        </div>
+        <div class="state-actions">
+          <button id="exportState" class="button" type="button">Экспорт состояния</button>
+          <button id="importState" class="button" type="button">Импорт состояния</button>
+          <input id="importStateFile" class="visually-hidden" type="file" accept="application/json">
+        </div>
+      </div>
+    </section>
+
     <section id="sessionPanel" class="session-panel" aria-labelledby="sessionTitle">
       <div class="session-head">
         <div>
@@ -612,6 +824,7 @@
           <span id="timerTag" class="tag">00:00</span>
           <span id="answeredTag" class="tag">0 ответов</span>
           <span id="confidenceTag" class="tag">0 уверенно</span>
+          <span id="saveStatus" class="tag">Автосохранение готово</span>
         </div>
       </div>
 
@@ -641,7 +854,7 @@
             <div class="nav-buttons">
               <a id="sourceLink" class="button" href="#" target="_blank" rel="noreferrer">Источник</a>
               <button id="toggleReference" class="button" type="button">Показать эталон</button>
-              <button id="finishInterview" class="button button-primary" type="button">Сформировать отчет</button>
+              <button id="finishInterview" class="button button-primary" type="button">Завершить и отчет</button>
             </div>
           </div>
         </article>
@@ -671,19 +884,26 @@
     </section>
 
     <footer>
-      Данные сессии хранятся в отдельном ключе localStorage: real-interview-session-v1. Ключи прогресса основных разделов не изменяются.
+      Данные интервью хранятся в localStorage: текущая сессия, история сетов, архив завершенных интервью и черновик последнего отчета. Ключи прогресса основных разделов не изменяются.
     </footer>
   </main>
 
   <script src="interview_question_bank.js"></script>
   <script>
     const questionBank = Array.isArray(window.INTERVIEW_QUESTION_BANK) ? window.INTERVIEW_QUESTION_BANK : [];
+    const availableQuestionIds = new Set(questionBank.map((item) => item.id));
     const interviewWeights = [
       {
         moduleKey: 'java-core',
         label: 'Java Core, JVM, коллекции, concurrency',
-        percent: 30,
+        percent: 35,
         accent: '#2563eb'
+      },
+      {
+        moduleKey: 'hibernate-db',
+        label: 'SQL, PostgreSQL, Hibernate и JPA',
+        percent: 25,
+        accent: '#0d9488'
       },
       {
         moduleKey: 'spring',
@@ -692,46 +912,52 @@
         accent: '#16a34a'
       },
       {
-        moduleKey: 'hibernate-db',
-        label: 'SQL, PostgreSQL, Hibernate и JPA',
-        percent: 20,
-        accent: '#0d9488'
-      },
-      {
         moduleKey: 'microservices',
         label: 'Microservices, REST, Kafka, Docker/Kubernetes',
         percent: 20,
         accent: '#be123c'
-      },
-      {
-        moduleKey: 'algorithmic',
-        label: 'Алгоритмы и практическое кодирование',
-        percent: 10,
-        accent: '#7c3aed'
       }
     ];
+    const moduleOrder = new Map(interviewWeights.map((item, index) => [item.moduleKey, index]));
 
     const checklistKeys = {
       'java-core': 'java-core-checklist-v1',
       'spring': 'pdf-spring-checklist-v1',
       'hibernate-db': 'pdf-hibernate-jpa-db-checklist-v1',
-      'microservices': 'pdf-remaining-topics-checklist-v1',
-      'algorithmic': 'algorithmic-section-checklist-v1'
+      'microservices': 'pdf-remaining-topics-checklist-v1'
     };
 
     const storageKey = 'real-interview-session-v1';
+    const historyKey = 'real-interview-history-v1';
+    const archiveKey = 'real-interview-archive-v1';
+    const reportDraftKey = 'real-interview-report-draft-v1';
+    const setSize = 5;
+    const archiveLimit = 50;
     const weightsEl = document.querySelector('#weights');
     const sessionSize = document.querySelector('#sessionSize');
     const preferUnstudied = document.querySelector('#preferUnstudied');
     const hideReference = document.querySelector('#hideReference');
     const startInterview = document.querySelector('#startInterview');
     const resetSession = document.querySelector('#resetSession');
+    const resetStats = document.querySelector('#resetStats');
     const bankStatus = document.querySelector('#bankStatus');
+    const statsGrid = document.querySelector('#statsGrid');
+    const setTitle = document.querySelector('#setTitle');
+    const setCount = document.querySelector('#setCount');
+    const setSlots = document.querySelector('#setSlots');
+    const setProgressFill = document.querySelector('#setProgressFill');
+    const rewardCard = document.querySelector('#rewardCard');
+    const historyList = document.querySelector('#historyList');
+    const archiveInfo = document.querySelector('#archiveInfo');
+    const exportState = document.querySelector('#exportState');
+    const importState = document.querySelector('#importState');
+    const importStateFile = document.querySelector('#importStateFile');
     const sessionPanel = document.querySelector('#sessionPanel');
     const sessionPlan = document.querySelector('#sessionPlan');
     const timerTag = document.querySelector('#timerTag');
     const answeredTag = document.querySelector('#answeredTag');
     const confidenceTag = document.querySelector('#confidenceTag');
+    const saveStatus = document.querySelector('#saveStatus');
     const questionCard = document.querySelector('#questionCard');
     const questionMeta = document.querySelector('#questionMeta');
     const questionText = document.querySelector('#questionText');
@@ -774,21 +1000,111 @@
       }
     }
 
+    function saveTimeLabel() {
+      return new Intl.DateTimeFormat('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).format(new Date());
+    }
+
+    function markSaved(label = 'Сохранено') {
+      if (!saveStatus) return;
+      saveStatus.textContent = `${label}: ${saveTimeLabel()}`;
+    }
+
+    function persistJson(key, value, label) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        markSaved(label);
+        return true;
+      } catch (error) {
+        if (reportStatus) {
+          reportStatus.textContent = `Не удалось сохранить ${label.toLowerCase()}: ${error.message}`;
+        }
+        return false;
+      }
+    }
+
+    function isValidSession(value) {
+      return Boolean(
+        value
+        && Array.isArray(value.questions)
+        && !value.questions.some((item) => !item || !availableQuestionIds.has(item.id))
+      );
+    }
+
     function loadSession() {
       try {
         const value = JSON.parse(localStorage.getItem(storageKey) || 'null');
-        if (!value || !Array.isArray(value.questions)) return null;
+        if (!value) return null;
+        if (!isValidSession(value)) {
+          localStorage.removeItem(storageKey);
+          return null;
+        }
         return value;
       } catch {
         return null;
       }
     }
 
+    function loadHistory() {
+      try {
+        const value = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        if (!Array.isArray(value)) return [];
+        return value.filter((item) => item && item.id && item.completedAt);
+      } catch {
+        return [];
+      }
+    }
+
+    function loadArchive() {
+      try {
+        const value = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+        if (!Array.isArray(value)) return [];
+        return value.filter((item) => item && item.id && Array.isArray(item.questions));
+      } catch {
+        return [];
+      }
+    }
+
+    function saveArchive(archive) {
+      const trimmedArchive = archive
+        .slice()
+        .sort((left, right) => new Date(left.completedAt || left.savedAt) - new Date(right.completedAt || right.savedAt))
+        .slice(-archiveLimit);
+      return persistJson(archiveKey, trimmedArchive, 'Архив сохранен');
+    }
+
+    function loadReportDraft() {
+      try {
+        const value = JSON.parse(localStorage.getItem(reportDraftKey) || 'null');
+        if (!value || typeof value.text !== 'string') return null;
+        return value;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveReportDraft(data, text, format) {
+      return persistJson(reportDraftKey, {
+        version: 1,
+        sessionId: data.sessionId,
+        generatedAt: data.generatedAt,
+        format,
+        text
+      }, 'Отчет сохранен');
+    }
+
+    function saveHistory(history) {
+      persistJson(historyKey, history, 'История сохранена');
+    }
+
     function saveSession() {
       if (!session) return;
       session.currentIndex = currentIndex;
       session.updatedAt = new Date().toISOString();
-      localStorage.setItem(storageKey, JSON.stringify(session));
+      persistJson(storageKey, session, 'Сессия сохранена');
     }
 
     function shuffle(items) {
@@ -804,6 +1120,18 @@
       const key = checklistKeys[item.moduleKey];
       if (!key) return false;
       return loadArray(key).includes(item.sourceId);
+    }
+
+    function numericPart(value) {
+      const match = String(value || '').match(/\d+/);
+      return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
+    }
+
+    function compareByStudyOrder(left, right) {
+      return (moduleOrder.get(left.moduleKey) ?? 999) - (moduleOrder.get(right.moduleKey) ?? 999)
+        || numericPart(left.topicId) - numericPart(right.topicId)
+        || numericPart(left.sourceNumber) - numericPart(right.sourceNumber)
+        || left.question.localeCompare(right.question, 'ru');
     }
 
     function allocateCounts(total) {
@@ -865,7 +1193,7 @@
         questions = questions.concat(selectFromPool(planItem.moduleKey, planItem.count, usedSources, preferUnstudied.checked));
       });
 
-      questions = shuffle(questions).map((item) => ({
+      questions = questions.sort(compareByStudyOrder).map((item) => ({
         ...item,
         userAnswer: '',
         confidence: '',
@@ -892,6 +1220,259 @@
     function sessionElapsedMs() {
       if (!session) return 0;
       return Date.now() - new Date(session.startedAt).getTime();
+    }
+
+    function formatDateTime(value) {
+      if (!value) return 'нет данных';
+      return new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(value));
+    }
+
+    function formatPercentValue(value) {
+      if (!Number.isFinite(value)) return '0%';
+      return `${Math.round(value * 100)}%`;
+    }
+
+    function average(values) {
+      const valid = values.filter((value) => Number.isFinite(value));
+      if (!valid.length) return 0;
+      return valid.reduce((sum, value) => sum + value, 0) / valid.length;
+    }
+
+    function rewardForSet(setNumber, records) {
+      const totalQuestions = records.reduce((sum, item) => sum + item.total, 0);
+      const answered = records.reduce((sum, item) => sum + item.answered, 0);
+      const strong = records.reduce((sum, item) => sum + item.strong, 0);
+      const weak = records.reduce((sum, item) => sum + item.weak, 0);
+      const answeredRate = totalQuestions ? answered / totalQuestions : 0;
+      const strongRate = totalQuestions ? strong / totalQuestions : 0;
+      const weakRate = totalQuestions ? weak / totalQuestions : 0;
+
+      if (strongRate >= 0.72 && answeredRate >= 0.9) {
+        return {
+          title: `Бейдж сета #${setNumber}: золотой прогон`,
+          text: `${formatPercentValue(strongRate)} уверенных ответов и ${formatPercentValue(answeredRate)} заполнения. Это уже похоже на стабильный интервью-пейс.`
+        };
+      }
+
+      if (weakRate <= 0.12 && answeredRate >= 0.85) {
+        return {
+          title: `Бейдж сета #${setNumber}: чистая серия`,
+          text: `Слабых ответов только ${formatPercentValue(weakRate)}, заполнение ${formatPercentValue(answeredRate)}. Хороший контроль пробелов.`
+        };
+      }
+
+      if (answeredRate >= 0.9) {
+        return {
+          title: `Бейдж сета #${setNumber}: полный проход`,
+          text: `${formatPercentValue(answeredRate)} вопросов получили ответ. Выносливость и темп на месте.`
+        };
+      }
+
+      return {
+        title: `Бейдж сета #${setNumber}: пять подходов`,
+        text: `Сет закрыт: ${records.length} интервью подряд. Следующая цель - меньше пустых ответов и больше уверенных формулировок.`
+      };
+    }
+
+    function summarizeCurrentSession() {
+      if (!session) return null;
+      const total = session.questions.length;
+      const answered = session.questions.filter((item) => item.userAnswer.trim()).length;
+      const strong = session.questions.filter((item) => item.confidence === 'strong').length;
+      const partial = session.questions.filter((item) => item.confidence === 'partial').length;
+      const weak = session.questions.filter((item) => item.confidence === 'weak').length;
+      const elapsedMs = session.completedElapsedMs || sessionElapsedMs();
+      const byModule = session.questions.reduce((acc, item) => {
+        const key = item.moduleTitle;
+        if (!acc[key]) {
+          acc[key] = { total: 0, answered: 0, strong: 0, partial: 0, weak: 0 };
+        }
+        acc[key].total += 1;
+        if (item.userAnswer.trim()) acc[key].answered += 1;
+        if (item.confidence === 'strong') acc[key].strong += 1;
+        if (item.confidence === 'partial') acc[key].partial += 1;
+        if (item.confidence === 'weak') acc[key].weak += 1;
+        return acc;
+      }, {});
+
+      return {
+        id: session.id,
+        startedAt: session.startedAt,
+        completedAt: session.completedAt || new Date().toISOString(),
+        elapsedMs,
+        elapsed: formatDuration(elapsedMs),
+        total,
+        answered,
+        unanswered: total - answered,
+        strong,
+        partial,
+        weak,
+        completionRate: total ? answered / total : 0,
+        strongRate: total ? strong / total : 0,
+        byModule
+      };
+    }
+
+    function fullSessionSnapshot(record) {
+      if (!session) return null;
+      const summary = record || summarizeCurrentSession();
+      if (!summary) return null;
+
+      return {
+        version: 1,
+        id: session.id,
+        status: session.completedAt ? 'completed' : 'draft',
+        startedAt: session.startedAt,
+        completedAt: session.completedAt || summary.completedAt,
+        savedAt: new Date().toISOString(),
+        currentIndex,
+        elapsedMs: summary.elapsedMs,
+        elapsed: summary.elapsed,
+        total: summary.total,
+        answered: summary.answered,
+        strong: summary.strong,
+        partial: summary.partial,
+        weak: summary.weak,
+        completionRate: summary.completionRate,
+        strongRate: summary.strongRate,
+        byModule: summary.byModule,
+        distribution: session.plan,
+        questions: session.questions.map((item, index) => ({
+          index: index + 1,
+          id: item.id,
+          moduleKey: item.moduleKey,
+          module: item.moduleTitle,
+          topicId: item.topicId,
+          topic: item.topicTitle,
+          sourceId: item.sourceId,
+          sourceNumber: item.sourceNumber,
+          sourceType: item.sourceType,
+          difficulty: item.difficulty,
+          question: item.question,
+          myAnswer: item.userAnswer.trim(),
+          selfAssessment: item.confidence || '',
+          selfAssessmentLabel: confidenceLabel(item.confidence),
+          referenceAnswer: item.answer || '',
+          source: item.href || ''
+        }))
+      };
+    }
+
+    function upsertArchivedSession(record) {
+      const snapshot = fullSessionSnapshot(record);
+      if (!snapshot) return [];
+
+      const archive = loadArchive();
+      const existingIndex = archive.findIndex((item) => item.id === snapshot.id);
+      if (existingIndex === -1) {
+        archive.push(snapshot);
+      } else {
+        archive[existingIndex] = snapshot;
+      }
+
+      saveArchive(archive);
+      return loadArchive();
+    }
+
+    function upsertCompletionRecord() {
+      const record = summarizeCurrentSession();
+      if (!record) return null;
+
+      if (!session.completedAt) {
+        session.completedAt = record.completedAt;
+        session.completedElapsedMs = record.elapsedMs;
+      } else {
+        record.completedAt = session.completedAt;
+        record.elapsedMs = session.completedElapsedMs || record.elapsedMs;
+        record.elapsed = formatDuration(record.elapsedMs);
+      }
+
+      let history = loadHistory();
+      const existingIndex = history.findIndex((item) => item.id === record.id);
+      const isNew = existingIndex === -1;
+      if (existingIndex === -1) {
+        history.push(record);
+      } else {
+        history[existingIndex] = record;
+      }
+      history.sort((left, right) => new Date(left.completedAt) - new Date(right.completedAt));
+      saveHistory(history);
+      saveSession();
+      upsertArchivedSession(record);
+      renderSetStats();
+      return { record, history, isNew };
+    }
+
+    function renderSetStats() {
+      const history = loadHistory();
+      const archive = loadArchive();
+      const completed = history.length;
+      const completedSets = Math.floor(completed / setSize);
+      const currentSetNumber = completedSets + 1;
+      const currentSetProgress = completed % setSize;
+      const totalQuestions = history.reduce((sum, item) => sum + item.total, 0);
+      const totalAnswered = history.reduce((sum, item) => sum + item.answered, 0);
+      const totalStrong = history.reduce((sum, item) => sum + item.strong, 0);
+      const totalWeak = history.reduce((sum, item) => sum + item.weak, 0);
+      const averageCompletion = average(history.map((item) => item.completionRate));
+      const averageStrong = totalQuestions ? totalStrong / totalQuestions : 0;
+      const weakRate = totalQuestions ? totalWeak / totalQuestions : 0;
+
+      statsGrid.innerHTML = [
+        { value: completed, label: 'завершено интервью' },
+        { value: completedSets, label: 'закрыто сетов по 5' },
+        { value: `${totalAnswered}/${totalQuestions || 0}`, label: 'ответов в статистике' },
+        { value: formatPercentValue(averageStrong), label: 'уверенных ответов' }
+      ].map((item) => `
+        <div class="stat-box">
+          <strong>${escapeHtml(item.value)}</strong>
+          <span>${escapeHtml(item.label)}</span>
+        </div>
+      `).join('');
+
+      setTitle.textContent = `Текущий сет #${currentSetNumber}`;
+      setCount.textContent = `${currentSetProgress} / ${setSize}`;
+      setProgressFill.style.setProperty('--value', `${(currentSetProgress / setSize) * 100}%`);
+      setSlots.innerHTML = Array.from({ length: setSize }, (_, index) => `
+        <span class="set-slot ${index < currentSetProgress ? 'is-filled' : ''}">${index + 1}</span>
+      `).join('');
+
+      if (completedSets > 0) {
+        const rewardSetNumber = completedSets;
+        const start = (rewardSetNumber - 1) * setSize;
+        const reward = rewardForSet(rewardSetNumber, history.slice(start, start + setSize));
+        rewardCard.hidden = false;
+        rewardCard.innerHTML = `
+          <strong>${escapeHtml(reward.title)}</strong>
+          <span>${escapeHtml(reward.text)}</span>
+          <span>Среднее заполнение: ${formatPercentValue(averageCompletion)} · слабых ответов: ${formatPercentValue(weakRate)}</span>
+        `;
+      } else {
+        rewardCard.hidden = true;
+        rewardCard.innerHTML = '';
+      }
+
+      historyList.innerHTML = history.slice(-5).reverse().map((item, index) => `
+        <div class="history-item">
+          <div>
+            <strong>Интервью ${completed - index} · ${formatDateTime(item.completedAt)}</strong>
+            <span>${item.answered}/${item.total} ответов · ${item.strong} уверенно · ${item.partial} неполно · ${item.weak} плохо</span>
+          </div>
+          <span class="tag">${escapeHtml(item.elapsed)}</span>
+        </div>
+      `).join('') || '<div class="history-item"><div><strong>Статистика пока пустая</strong><span>Заверши интервью через кнопку отчета, чтобы начать сет.</span></div></div>';
+
+      const latestArchive = archive.slice().sort((left, right) => (
+        new Date(right.completedAt || right.savedAt) - new Date(left.completedAt || left.savedAt)
+      ))[0];
+      archiveInfo.textContent = latestArchive
+        ? `В архиве ${archive.length} интервью · последнее ${formatDateTime(latestArchive.savedAt || latestArchive.completedAt)}`
+        : 'Архив пуст';
     }
 
     function renderWeights() {
@@ -975,6 +1556,10 @@
     function renderSession() {
       if (!session) {
         sessionPanel.classList.remove('is-active');
+        if (timerId) {
+          window.clearInterval(timerId);
+          timerId = null;
+        }
         return;
       }
 
@@ -997,14 +1582,28 @@
       return 'не отмечено';
     }
 
+    function selectedReportFormat() {
+      return reportFormat.value === 'json' ? 'json' : 'markdown';
+    }
+
     function reportData() {
       if (!session) return null;
+      const currentSummary = summarizeCurrentSession();
+      const history = loadHistory();
       return {
         instruction: 'Оцени мои ответы как интервьюер Java backend. Для каждого ответа дай оценку 0-2, укажи ошибки, пропуски и что повторить.',
         generatedAt: new Date().toISOString(),
         sessionId: session.id,
         startedAt: session.startedAt,
         elapsed: formatDuration(sessionElapsedMs()),
+        statistics: {
+          currentInterview: currentSummary,
+          completedInterviews: history.length,
+          completedSets: Math.floor(history.length / setSize),
+          currentSetNumber: Math.floor(history.length / setSize) + 1,
+          currentSetProgress: history.length % setSize,
+          setSize
+        },
         distribution: session.plan,
         questions: session.questions.map((item, index) => ({
           index: index + 1,
@@ -1032,6 +1631,12 @@
       lines.push(`- Начало: ${data.startedAt}`);
       lines.push(`- Отчет сформирован: ${data.generatedAt}`);
       lines.push(`- Время: ${data.elapsed}`);
+      if (data.statistics && data.statistics.currentInterview) {
+        const stats = data.statistics.currentInterview;
+        lines.push(`- Ответов: ${stats.answered}/${stats.total}`);
+        lines.push(`- Самооценка: ${stats.strong} уверенно, ${stats.partial} неполно, ${stats.weak} плохо`);
+        lines.push(`- Сеты: закрыто ${data.statistics.completedSets}, текущий #${data.statistics.currentSetNumber} (${data.statistics.currentSetProgress}/${data.statistics.setSize})`);
+      }
       lines.push('');
       lines.push('## Распределение');
       data.distribution.forEach((item) => {
@@ -1068,10 +1673,35 @@
         return;
       }
 
-      reportOutput.value = reportFormat.value === 'json'
+      const format = selectedReportFormat();
+      const output = format === 'json'
         ? JSON.stringify(data, null, 2)
         : buildMarkdownReport(data);
-      reportStatus.textContent = `Отчет обновлен: ${data.questions.length} вопросов, ${data.elapsed}.`;
+      reportOutput.value = output;
+      const draftSaved = saveReportDraft(data, output, format);
+      reportStatus.textContent = draftSaved
+        ? `Отчет обновлен: ${data.questions.length} вопросов, ${data.elapsed}. Черновик сохранен.`
+        : `Отчет обновлен: ${data.questions.length} вопросов, ${data.elapsed}. Черновик не сохранен.`;
+    }
+
+    function restoreReportDraft() {
+      const draft = loadReportDraft();
+      if (!draft || !draft.text) return;
+      reportFormat.value = draft.format === 'json' ? 'json' : 'markdown';
+      reportOutput.value = draft.text;
+      reportStatus.textContent = `Восстановлен черновик отчета от ${formatDateTime(draft.generatedAt)}.`;
+    }
+
+    function downloadTextFile(text, filename, mime) {
+      const blob = new Blob([text], { type: `${mime};charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     }
 
     async function copyReportText() {
@@ -1093,18 +1723,134 @@
       if (!reportOutput.value) updateReport();
       if (!reportOutput.value) return;
 
-      const extension = reportFormat.value === 'json' ? 'json' : 'md';
-      const mime = reportFormat.value === 'json' ? 'application/json' : 'text/markdown';
-      const blob = new Blob([reportOutput.value], { type: `${mime};charset=utf-8` });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `java-interview-report-${new Date().toISOString().slice(0, 10)}.${extension}`;
-      document.body.append(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      const format = selectedReportFormat();
+      const extension = format === 'json' ? 'json' : 'md';
+      const mime = format === 'json' ? 'application/json' : 'text/markdown';
+      downloadTextFile(
+        reportOutput.value,
+        `java-interview-report-${new Date().toISOString().slice(0, 10)}.${extension}`,
+        mime
+      );
       reportStatus.textContent = 'Отчет скачан.';
+    }
+
+    function createStateExport() {
+      if (session) saveSession();
+      return {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        storageKeys: {
+          session: storageKey,
+          history: historyKey,
+          archive: archiveKey,
+          reportDraft: reportDraftKey
+        },
+        session: loadSession(),
+        history: loadHistory(),
+        archive: loadArchive(),
+        reportDraft: loadReportDraft()
+      };
+    }
+
+    function exportInterviewState() {
+      const state = createStateExport();
+      downloadTextFile(
+        JSON.stringify(state, null, 2),
+        `java-interview-state-${new Date().toISOString().slice(0, 10)}.json`,
+        'application/json'
+      );
+      reportStatus.textContent = `Состояние экспортировано: ${state.history.length} записей статистики, ${state.archive.length} интервью в архиве.`;
+    }
+
+    function normalizeImportedHistory(value) {
+      if (!Array.isArray(value)) return [];
+      return value.filter((item) => item && item.id && item.completedAt);
+    }
+
+    function normalizeImportedArchive(value) {
+      if (!Array.isArray(value)) return [];
+      return value
+        .filter((item) => item && item.id && Array.isArray(item.questions))
+        .slice(-archiveLimit);
+    }
+
+    function normalizeImportedReportDraft(value) {
+      if (!value || typeof value.text !== 'string') return null;
+      return {
+        version: Number(value.version || 1),
+        sessionId: value.sessionId || '',
+        generatedAt: value.generatedAt || new Date().toISOString(),
+        format: value.format === 'json' ? 'json' : 'markdown',
+        text: value.text
+      };
+    }
+
+    function normalizeImportedSession(value) {
+      if (!value) return null;
+      if (!isValidSession(value)) {
+        throw new Error('текущая сессия содержит вопросы, которых нет в локальном банке');
+      }
+      return value;
+    }
+
+    function applyImportedState(value) {
+      if (!value || typeof value !== 'object') {
+        throw new Error('файл состояния пустой или поврежден');
+      }
+
+      const nextSession = normalizeImportedSession(value.session || null);
+      const nextHistory = normalizeImportedHistory(value.history);
+      const nextArchive = normalizeImportedArchive(value.archive);
+      const nextDraft = normalizeImportedReportDraft(value.reportDraft);
+
+      if (nextSession) {
+        persistJson(storageKey, nextSession, 'Сессия импортирована');
+      } else {
+        localStorage.removeItem(storageKey);
+      }
+      persistJson(historyKey, nextHistory, 'История импортирована');
+      persistJson(archiveKey, nextArchive, 'Архив импортирован');
+      if (nextDraft) {
+        persistJson(reportDraftKey, nextDraft, 'Отчет импортирован');
+      } else {
+        localStorage.removeItem(reportDraftKey);
+      }
+
+      session = loadSession();
+      currentIndex = session
+        ? Math.min(Number(session.currentIndex || 0), session.questions.length - 1)
+        : 0;
+      renderSession();
+      renderSetStats();
+      reportOutput.value = '';
+      reportStatus.textContent = '';
+      restoreReportDraft();
+
+      if (session) {
+        bankStatus.textContent = `Импортирована сессия: ${session.questions.length} вопросов.`;
+      } else {
+        const pdfCount = new Set(questionBank.filter((item) => item.sourceType === 'pdf').map((item) => item.sourceId)).size;
+        bankStatus.textContent = `Состояние импортировано. Банк готов: ${pdfCount} PDF-вопросов.`;
+      }
+      reportStatus.textContent = `Состояние импортировано: ${nextHistory.length} записей статистики, ${nextArchive.length} интервью в архиве.`;
+      markSaved('Импорт применен');
+    }
+
+    function importInterviewStateFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        try {
+          applyImportedState(JSON.parse(String(reader.result || '{}')));
+        } catch (error) {
+          reportStatus.textContent = `Не удалось импортировать состояние: ${error.message}`;
+        } finally {
+          importStateFile.value = '';
+        }
+      });
+      reader.readAsText(file);
     }
 
     function startNewInterview() {
@@ -1121,6 +1867,7 @@
       currentIndex = 0;
       reportOutput.value = '';
       reportStatus.textContent = '';
+      localStorage.removeItem(reportDraftKey);
       saveSession();
       renderSession();
       userAnswer.focus();
@@ -1132,21 +1879,40 @@
       session = null;
       currentIndex = 0;
       localStorage.removeItem(storageKey);
+      localStorage.removeItem(reportDraftKey);
       reportOutput.value = '';
       reportStatus.textContent = '';
       if (timerId) window.clearInterval(timerId);
       renderSession();
       bankStatus.textContent = 'Сессия сброшена.';
+      markSaved('Сессия удалена');
+    }
+
+    function resetInterviewStats() {
+      if (!loadHistory().length && !loadArchive().length) return;
+      if (!confirm('Удалить статистику сетов и архив завершенных интервью? Текущая сессия останется.')) return;
+      localStorage.removeItem(historyKey);
+      localStorage.removeItem(archiveKey);
+      if (session) {
+        delete session.completedAt;
+        delete session.completedElapsedMs;
+        saveSession();
+      }
+      renderSetStats();
+      reportStatus.textContent = 'Статистика сетов и архив сброшены.';
+      markSaved('Статистика удалена');
     }
 
     startInterview.addEventListener('click', startNewInterview);
     resetSession.addEventListener('click', resetCurrentSession);
+    resetStats.addEventListener('click', resetInterviewStats);
 
     userAnswer.addEventListener('input', () => {
       if (!session) return;
       session.questions[currentIndex].userAnswer = userAnswer.value;
       answerCount.textContent = `${userAnswer.value.length} символов`;
       saveSession();
+      if (session.completedAt) upsertCompletionRecord();
       renderStats();
       renderRail();
     });
@@ -1157,6 +1923,7 @@
         const item = session.questions[currentIndex];
         item.confidence = item.confidence === button.dataset.confidence ? '' : button.dataset.confidence;
         saveSession();
+        if (session.completedAt) upsertCompletionRecord();
         renderQuestion();
       });
     });
@@ -1195,7 +1962,19 @@
     });
 
     finishInterview.addEventListener('click', () => {
+      const result = upsertCompletionRecord();
       updateReport();
+      if (result) {
+        const completed = result.history.length;
+        const progress = completed % setSize;
+        if (result.isNew && progress === 0) {
+          const setNumber = completed / setSize;
+          const reward = rewardForSet(setNumber, result.history.slice(completed - setSize, completed));
+          reportStatus.textContent = `Сет #${setNumber} закрыт. Награда: ${reward.title}. Отчет обновлен.`;
+        } else {
+          reportStatus.textContent = `Интервью записано в статистику. Текущий сет: ${progress}/${setSize}. Отчет обновлен.`;
+        }
+      }
       reportOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 
@@ -1203,8 +1982,12 @@
     reportFormat.addEventListener('change', updateReport);
     copyReport.addEventListener('click', copyReportText);
     downloadReport.addEventListener('click', downloadReportText);
+    exportState.addEventListener('click', exportInterviewState);
+    importState.addEventListener('click', () => importStateFile.click());
+    importStateFile.addEventListener('change', importInterviewStateFile);
 
     renderWeights();
+    renderSetStats();
 
     const savedSession = loadSession();
     if (savedSession) {
@@ -1214,9 +1997,9 @@
       renderSession();
     } else {
       const pdfCount = new Set(questionBank.filter((item) => item.sourceType === 'pdf').map((item) => item.sourceId)).size;
-      const algorithmCount = questionBank.filter((item) => item.sourceType === 'algorithm').length;
-      bankStatus.textContent = `Банк готов: ${pdfCount} PDF-вопросов и ${algorithmCount} алгоритмических задач.`;
+      bankStatus.textContent = `Банк готов: ${pdfCount} PDF-вопросов.`;
     }
+    restoreReportDraft();
   </script>
 </body>
 </html>
