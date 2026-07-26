@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Имитация Java-интервью</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #5b6472;
+      --soft: #eef2f6;
+      --line: #dce3eb;
+      --strong-line: #c6d0dc;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --rose: #be123c;
+      --teal: #0d9488;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, select, textarea, input { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 8px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2, h3 {
+      margin: 0;
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 820px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .top-actions,
+    .action-row,
+    .question-actions,
+    .report-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .top-actions { justify-content: flex-end; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 13px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+
+    .button:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .button-primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .button-primary:hover {
+      border-color: #1d4ed8;
+      background: #1d4ed8;
+    }
+
+    .button-danger {
+      border-color: rgba(190, 18, 60, 0.35);
+      background: rgba(190, 18, 60, 0.08);
+      color: #9f1239;
+    }
+
+    .button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: end;
+      margin: 28px 0 12px;
+    }
+
+    .section-head h2 {
+      font-size: 1.35rem;
+      line-height: 1.25;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .panel,
+    .question-card,
+    .report-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 16px; }
+
+    .panel h2 {
+      font-size: 1.15rem;
+      line-height: 1.25;
+    }
+
+    .panel-note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .weights {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .weight-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 64px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .weight-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .weight-label strong {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .weight-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .weight-fill {
+      width: var(--value);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .weight-percent {
+      color: var(--ink);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--ink);
+      font-size: 0.9rem;
+      font-weight: 850;
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    select {
+      min-height: 42px;
+      padding: 0 10px;
+    }
+
+    textarea {
+      min-height: 180px;
+      padding: 12px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .toggle {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .toggle input { margin-top: 3px; }
+
+    .session-panel {
+      display: none;
+      margin-top: 26px;
+    }
+
+    .session-panel.is-active { display: block; }
+
+    .session-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .session-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 8px;
+      border: 1px solid color-mix(in srgb, var(--accent, #2563eb), white 68%);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent, #2563eb), white 94%);
+      color: color-mix(in srgb, var(--accent, #2563eb), black 12%);
+      font-size: 0.78rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .interview-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .question-card {
+      min-height: 540px;
+      padding: 18px;
+      border-left: 5px solid var(--accent, var(--blue));
+    }
+
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .question-title {
+      margin: 0 0 14px;
+      font-size: clamp(1.25rem, 2.5vw, 1.9rem);
+      line-height: 1.2;
+    }
+
+    .answer-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 12px 0 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 850;
+    }
+
+    .reference-answer {
+      margin-top: 12px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+
+    .reference-answer[hidden] { display: none; }
+
+    .confidence-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .confidence-button {
+      min-height: 40px;
+      border: 1px solid var(--strong-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .confidence-button.is-active[data-confidence="strong"] {
+      border-color: rgba(22, 163, 74, 0.45);
+      background: rgba(22, 163, 74, 0.1);
+      color: #15803d;
+    }
+
+    .confidence-button.is-active[data-confidence="partial"] {
+      border-color: rgba(217, 119, 6, 0.45);
+      background: rgba(217, 119, 6, 0.1);
+      color: #a16207;
+    }
+
+    .confidence-button.is-active[data-confidence="weak"] {
+      border-color: rgba(190, 18, 60, 0.4);
+      background: rgba(190, 18, 60, 0.08);
+      color: #9f1239;
+    }
+
+    .question-actions {
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .question-rail {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .rail-button {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .rail-button.is-active {
+      border-color: var(--accent, var(--blue));
+      background: color-mix(in srgb, var(--accent, #2563eb), white 93%);
+    }
+
+    .rail-index {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .rail-title {
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rail-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--strong-line);
+    }
+
+    .rail-button.has-answer .rail-status { background: var(--blue); }
+    .rail-button[data-confidence="strong"] .rail-status { background: var(--green); }
+    .rail-button[data-confidence="partial"] .rail-status { background: var(--amber); }
+    .rail-button[data-confidence="weak"] .rail-status { background: var(--rose); }
+
+    .report-panel {
+      margin-top: 26px;
+      padding: 16px;
+    }
+
+    .report-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .report-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .report-output {
+      min-height: 280px;
+      margin-top: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.88rem;
+    }
+
+    .status-line {
+      min-height: 24px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 980px) {
+      .topbar,
+      .setup-grid,
+      .session-head,
+      .interview-grid,
+      .report-head {
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions { justify-content: flex-start; }
+      .question-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 18px; }
+      h1 { font-size: 1.85rem; }
+      .button,
+      .confidence-button { width: 100%; }
+      .confidence-row,
+      .question-rail {
+        grid-template-columns: 1fr;
+      }
+      .question-actions { display: grid; }
+      .nav-buttons { display: grid; }
+      .weight-row { grid-template-columns: 1fr 48px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">Interview Simulator</span>
+        <h1>Имитация реального Java-интервью</h1>
+        <p class="lead">Сессия собирается из локальных PDF-вопросов и отдельной алгоритмической секции с пропорциями, близкими к техническому Java backend интервью.</p>
+      </div>
+      <div class="top-actions" aria-label="Быстрые действия">
+        <a class="button" href="index.html">На главную</a>
+        <button id="resetSession" class="button button-danger" type="button">Сбросить сессию</button>
+      </div>
+    </header>
+
+    <section class="setup-grid" aria-labelledby="setupTitle">
+      <div class="panel">
+        <h2 id="setupTitle">Пропорции интервью</h2>
+        <p class="panel-note">Рабочая модель для технической части middle Java backend интервью. В конкретной компании веса могут сдвигаться под стек команды.</p>
+        <div id="weights" class="weights"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Запуск</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="sessionSize">Формат</label>
+            <select id="sessionSize">
+              <option value="14" selected>60 минут - 14 вопросов</option>
+              <option value="8">30 минут - 8 вопросов</option>
+              <option value="10">45 минут - 10 вопросов</option>
+              <option value="20">90 минут - 20 вопросов</option>
+            </select>
+          </div>
+          <label class="toggle">
+            <input id="preferUnstudied" type="checkbox" checked>
+            <span>Сначала брать вопросы, которые не отмечены изученными в основных разделах.</span>
+          </label>
+          <label class="toggle">
+            <input id="hideReference" type="checkbox" checked>
+            <span>Скрывать краткий эталон до ручного открытия.</span>
+          </label>
+          <div class="action-row">
+            <button id="startInterview" class="button button-primary" type="button">Запустить интервью</button>
+          </div>
+          <div id="bankStatus" class="status-line"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sessionPanel" class="session-panel" aria-labelledby="sessionTitle">
+      <div class="session-head">
+        <div>
+          <h2 id="sessionTitle">Сессия</h2>
+          <p id="sessionPlan" class="panel-note"></p>
+        </div>
+        <div class="session-stats">
+          <span id="timerTag" class="tag">00:00</span>
+          <span id="answeredTag" class="tag">0 ответов</span>
+          <span id="confidenceTag" class="tag">0 уверенно</span>
+        </div>
+      </div>
+
+      <div class="interview-grid">
+        <article id="questionCard" class="question-card">
+          <div id="questionMeta" class="question-meta"></div>
+          <h3 id="questionText" class="question-title"></h3>
+          <div class="answer-label">
+            <span>Мой ответ</span>
+            <span id="answerCount">0 символов</span>
+          </div>
+          <textarea id="userAnswer" placeholder="Пиши так, как отвечал бы голосом: коротко, по сути, с примерами и оговорками."></textarea>
+
+          <div class="confidence-row" aria-label="Самооценка ответа">
+            <button class="confidence-button" type="button" data-confidence="strong">Уверенно</button>
+            <button class="confidence-button" type="button" data-confidence="partial">Неполно</button>
+            <button class="confidence-button" type="button" data-confidence="weak">Плохо</button>
+          </div>
+
+          <div id="referenceAnswer" class="reference-answer" hidden></div>
+
+          <div class="question-actions">
+            <div class="nav-buttons">
+              <button id="prevQuestion" class="button" type="button">Назад</button>
+              <button id="nextQuestion" class="button" type="button">Дальше</button>
+            </div>
+            <div class="nav-buttons">
+              <a id="sourceLink" class="button" href="#" target="_blank" rel="noreferrer">Источник</a>
+              <button id="toggleReference" class="button" type="button">Показать эталон</button>
+              <button id="finishInterview" class="button button-primary" type="button">Сформировать отчет</button>
+            </div>
+          </div>
+        </article>
+
+        <nav id="questionRail" class="question-rail" aria-label="Вопросы сессии"></nav>
+      </div>
+    </section>
+
+    <section class="report-panel" aria-labelledby="reportTitle">
+      <div class="report-head">
+        <div>
+          <h2 id="reportTitle">Отчет для проверки ответов</h2>
+          <p>Отчет включает вопросы, твои ответы, самооценку и краткий эталон из локальных материалов.</p>
+        </div>
+        <div class="report-actions">
+          <select id="reportFormat" aria-label="Формат отчета">
+            <option value="markdown" selected>Markdown</option>
+            <option value="json">JSON</option>
+          </select>
+          <button id="buildReport" class="button button-primary" type="button">Обновить отчет</button>
+          <button id="copyReport" class="button" type="button">Скопировать</button>
+          <button id="downloadReport" class="button" type="button">Скачать</button>
+        </div>
+      </div>
+      <textarea id="reportOutput" class="report-output" readonly placeholder="После запуска интервью здесь появится отчет, который можно отправить на проверку."></textarea>
+      <div id="reportStatus" class="status-line"></div>
+    </section>
+
+    <footer>
+      Данные сессии хранятся в отдельном ключе localStorage: real-interview-session-v1. Ключи прогресса основных разделов не изменяются.
+    </footer>
+  </main>
+
+  <script src="interview_question_bank.js"></script>
+  <script>
+    const questionBank = Array.isArray(window.INTERVIEW_QUESTION_BANK) ? window.INTERVIEW_QUESTION_BANK : [];
+    const interviewWeights = [
+      {
+        moduleKey: 'java-core',
+        label: 'Java Core, JVM, коллекции, concurrency',
+        percent: 30,
+        accent: '#2563eb'
+      },
+      {
+        moduleKey: 'spring',
+        label: 'Spring, Spring Boot, DI, AOP, транзакции',
+        percent: 20,
+        accent: '#16a34a'
+      },
+      {
+        moduleKey: 'hibernate-db',
+        label: 'SQL, PostgreSQL, Hibernate и JPA',
+        percent: 20,
+        accent: '#0d9488'
+      },
+      {
+        moduleKey: 'microservices',
+        label: 'Microservices, REST, Kafka, Docker/Kubernetes',
+        percent: 20,
+        accent: '#be123c'
+      },
+      {
+        moduleKey: 'algorithmic',
+        label: 'Алгоритмы и практическое кодирование',
+        percent: 10,
+        accent: '#7c3aed'
+      }
+    ];
+
+    const checklistKeys = {
+      'java-core': 'java-core-checklist-v1',
+      'spring': 'pdf-spring-checklist-v1',
+      'hibernate-db': 'pdf-hibernate-jpa-db-checklist-v1',
+      'microservices': 'pdf-remaining-topics-checklist-v1',
+      'algorithmic': 'algorithmic-section-checklist-v1'
+    };
+
+    const storageKey = 'real-interview-session-v1';
+    const weightsEl = document.querySelector('#weights');
+    const sessionSize = document.querySelector('#sessionSize');
+    const preferUnstudied = document.querySelector('#preferUnstudied');
+    const hideReference = document.querySelector('#hideReference');
+    const startInterview = document.querySelector('#startInterview');
+    const resetSession = document.querySelector('#resetSession');
+    const bankStatus = document.querySelector('#bankStatus');
+    const sessionPanel = document.querySelector('#sessionPanel');
+    const sessionPlan = document.querySelector('#sessionPlan');
+    const timerTag = document.querySelector('#timerTag');
+    const answeredTag = document.querySelector('#answeredTag');
+    const confidenceTag = document.querySelector('#confidenceTag');
+    const questionCard = document.querySelector('#questionCard');
+    const questionMeta = document.querySelector('#questionMeta');
+    const questionText = document.querySelector('#questionText');
+    const userAnswer = document.querySelector('#userAnswer');
+    const answerCount = document.querySelector('#answerCount');
+    const referenceAnswer = document.querySelector('#referenceAnswer');
+    const toggleReference = document.querySelector('#toggleReference');
+    const sourceLink = document.querySelector('#sourceLink');
+    const prevQuestion = document.querySelector('#prevQuestion');
+    const nextQuestion = document.querySelector('#nextQuestion');
+    const finishInterview = document.querySelector('#finishInterview');
+    const questionRail = document.querySelector('#questionRail');
+    const reportFormat = document.querySelector('#reportFormat');
+    const buildReport = document.querySelector('#buildReport');
+    const copyReport = document.querySelector('#copyReport');
+    const downloadReport = document.querySelector('#downloadReport');
+    const reportOutput = document.querySelector('#reportOutput');
+    const reportStatus = document.querySelector('#reportStatus');
+    const confidenceButtons = Array.from(document.querySelectorAll('.confidence-button'));
+
+    let session = null;
+    let currentIndex = 0;
+    let timerId = null;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function loadArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function loadSession() {
+      try {
+        const value = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (!value || !Array.isArray(value.questions)) return null;
+        return value;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveSession() {
+      if (!session) return;
+      session.currentIndex = currentIndex;
+      session.updatedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(session));
+    }
+
+    function shuffle(items) {
+      const result = items.slice();
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+      }
+      return result;
+    }
+
+    function isStudied(item) {
+      const key = checklistKeys[item.moduleKey];
+      if (!key) return false;
+      return loadArray(key).includes(item.sourceId);
+    }
+
+    function allocateCounts(total) {
+      const plan = interviewWeights.map((weight) => {
+        const exact = (total * weight.percent) / 100;
+        return {
+          ...weight,
+          exact,
+          count: Math.floor(exact),
+          remainder: exact - Math.floor(exact)
+        };
+      });
+
+      let assigned = plan.reduce((sum, item) => sum + item.count, 0);
+      shuffle(plan.slice())
+        .sort((left, right) => right.remainder - left.remainder)
+        .forEach((item) => {
+          if (assigned >= total) return;
+          item.count += 1;
+          assigned += 1;
+        });
+
+      if (total >= plan.length) {
+        plan.filter((item) => item.count === 0).forEach((emptyItem) => {
+          const donor = plan.slice().sort((left, right) => right.count - left.count)[0];
+          if (donor && donor.count > 1) {
+            donor.count -= 1;
+            emptyItem.count += 1;
+          }
+        });
+      }
+
+      return plan;
+    }
+
+    function selectFromPool(moduleKey, count, usedSources, preferFresh) {
+      const pool = questionBank.filter((item) => item.moduleKey === moduleKey);
+      const orderedPool = preferFresh
+        ? shuffle(pool.filter((item) => !isStudied(item))).concat(shuffle(pool.filter(isStudied)))
+        : shuffle(pool);
+      const selected = [];
+
+      orderedPool.forEach((item) => {
+        if (selected.length >= count) return;
+        if (usedSources.has(item.sourceId)) return;
+        selected.push(item);
+        usedSources.add(item.sourceId);
+      });
+
+      return selected;
+    }
+
+    function createSession(total) {
+      const plan = allocateCounts(total);
+      const usedSources = new Set();
+      let questions = [];
+
+      plan.forEach((planItem) => {
+        questions = questions.concat(selectFromPool(planItem.moduleKey, planItem.count, usedSources, preferUnstudied.checked));
+      });
+
+      questions = shuffle(questions).map((item) => ({
+        ...item,
+        userAnswer: '',
+        confidence: '',
+        referenceVisible: !hideReference.checked
+      }));
+
+      return {
+        id: `interview-${Date.now()}`,
+        startedAt: new Date().toISOString(),
+        currentIndex: 0,
+        total,
+        plan: plan.map(({ moduleKey, label, percent, count }) => ({ moduleKey, label, percent, count })),
+        questions
+      };
+    }
+
+    function formatDuration(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+
+    function sessionElapsedMs() {
+      if (!session) return 0;
+      return Date.now() - new Date(session.startedAt).getTime();
+    }
+
+    function renderWeights() {
+      weightsEl.innerHTML = interviewWeights.map((item) => `
+        <div class="weight-row" style="--accent: ${escapeHtml(item.accent)}">
+          <div>
+            <div class="weight-label">
+              <strong>${escapeHtml(item.label)}</strong>
+            </div>
+            <div class="weight-track"><div class="weight-fill" style="--value: ${item.percent}%"></div></div>
+          </div>
+          <div class="weight-percent">${item.percent}%</div>
+        </div>
+      `).join('');
+    }
+
+    function renderStats() {
+      if (!session) return;
+      const answered = session.questions.filter((item) => item.userAnswer.trim()).length;
+      const strong = session.questions.filter((item) => item.confidence === 'strong').length;
+      timerTag.textContent = formatDuration(sessionElapsedMs());
+      answeredTag.textContent = `${answered} / ${session.questions.length} ответов`;
+      confidenceTag.textContent = `${strong} уверенно`;
+    }
+
+    function renderPlan() {
+      if (!session) return;
+      sessionPlan.textContent = session.plan
+        .filter((item) => item.count > 0)
+        .map((item) => `${item.label}: ${item.count}`)
+        .join(' · ');
+    }
+
+    function renderRail() {
+      if (!session) {
+        questionRail.innerHTML = '';
+        return;
+      }
+
+      questionRail.innerHTML = session.questions.map((item, index) => `
+        <button class="rail-button ${index === currentIndex ? 'is-active' : ''} ${item.userAnswer.trim() ? 'has-answer' : ''}"
+          type="button"
+          data-index="${index}"
+          data-confidence="${escapeHtml(item.confidence)}"
+          style="--accent: ${escapeHtml(item.accent)}">
+          <span class="rail-index">${index + 1}</span>
+          <span class="rail-title">${escapeHtml(item.sourceNumber)} · ${escapeHtml(item.topicTitle)}</span>
+          <span class="rail-status" aria-hidden="true"></span>
+        </button>
+      `).join('');
+    }
+
+    function renderQuestion() {
+      if (!session || !session.questions[currentIndex]) return;
+      const item = session.questions[currentIndex];
+      questionCard.style.setProperty('--accent', item.accent || '#2563eb');
+      questionMeta.innerHTML = [
+        item.moduleTitle,
+        item.sourceNumber,
+        item.topicTitle,
+        item.difficulty
+      ].filter(Boolean).map((value) => `<span class="tag" style="--accent: ${escapeHtml(item.accent)}">${escapeHtml(value)}</span>`).join('');
+      questionText.textContent = item.question;
+      userAnswer.value = item.userAnswer;
+      answerCount.textContent = `${item.userAnswer.length} символов`;
+      referenceAnswer.textContent = item.answer || 'Краткий эталон не найден.';
+      referenceAnswer.hidden = !item.referenceVisible;
+      toggleReference.textContent = item.referenceVisible ? 'Скрыть эталон' : 'Показать эталон';
+      sourceLink.href = item.href || '#';
+      prevQuestion.disabled = currentIndex === 0;
+      nextQuestion.disabled = currentIndex === session.questions.length - 1;
+
+      confidenceButtons.forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.confidence === item.confidence);
+      });
+
+      renderStats();
+      renderRail();
+    }
+
+    function renderSession() {
+      if (!session) {
+        sessionPanel.classList.remove('is-active');
+        return;
+      }
+
+      sessionPanel.classList.add('is-active');
+      renderPlan();
+      renderQuestion();
+      startTimer();
+    }
+
+    function startTimer() {
+      if (timerId) window.clearInterval(timerId);
+      timerId = window.setInterval(renderStats, 1000);
+      renderStats();
+    }
+
+    function confidenceLabel(value) {
+      if (value === 'strong') return 'уверенно';
+      if (value === 'partial') return 'неполно';
+      if (value === 'weak') return 'плохо';
+      return 'не отмечено';
+    }
+
+    function reportData() {
+      if (!session) return null;
+      return {
+        instruction: 'Оцени мои ответы как интервьюер Java backend. Для каждого ответа дай оценку 0-2, укажи ошибки, пропуски и что повторить.',
+        generatedAt: new Date().toISOString(),
+        sessionId: session.id,
+        startedAt: session.startedAt,
+        elapsed: formatDuration(sessionElapsedMs()),
+        distribution: session.plan,
+        questions: session.questions.map((item, index) => ({
+          index: index + 1,
+          module: item.moduleTitle,
+          topic: item.topicTitle,
+          sourceNumber: item.sourceNumber,
+          sourceType: item.sourceType,
+          difficulty: item.difficulty,
+          question: item.question,
+          myAnswer: item.userAnswer.trim(),
+          selfAssessment: confidenceLabel(item.confidence),
+          referenceAnswer: item.answer,
+          source: item.href
+        }))
+      };
+    }
+
+    function buildMarkdownReport(data) {
+      const lines = [];
+      lines.push('# Отчет по имитации Java-интервью');
+      lines.push('');
+      lines.push('Пожалуйста, оцени мои ответы как интервьюер Java backend: поставь 0-2 за каждый ответ, укажи ошибки, пропущенные детали и темы для повторения.');
+      lines.push('');
+      lines.push(`- Сессия: ${data.sessionId}`);
+      lines.push(`- Начало: ${data.startedAt}`);
+      lines.push(`- Отчет сформирован: ${data.generatedAt}`);
+      lines.push(`- Время: ${data.elapsed}`);
+      lines.push('');
+      lines.push('## Распределение');
+      data.distribution.forEach((item) => {
+        lines.push(`- ${item.label}: ${item.count} вопросов (${item.percent}%)`);
+      });
+      lines.push('');
+      lines.push('## Ответы');
+      data.questions.forEach((item) => {
+        lines.push('');
+        lines.push(`### ${item.index}. ${item.module} · ${item.sourceNumber} · ${item.topic}`);
+        lines.push('');
+        lines.push(`**Вопрос:** ${item.question}`);
+        lines.push('');
+        lines.push(`**Мой ответ:**`);
+        lines.push('');
+        lines.push(item.myAnswer || '_Нет ответа._');
+        lines.push('');
+        lines.push(`**Самооценка:** ${item.selfAssessment}`);
+        lines.push('');
+        lines.push(`**Краткий эталон из материалов:**`);
+        lines.push('');
+        lines.push(item.referenceAnswer || '_Эталон не найден._');
+        lines.push('');
+        lines.push(`**Источник:** ${item.source}`);
+      });
+      lines.push('');
+      return lines.join('\n');
+    }
+
+    function updateReport() {
+      const data = reportData();
+      if (!data) {
+        reportStatus.textContent = 'Сначала запусти интервью.';
+        return;
+      }
+
+      reportOutput.value = reportFormat.value === 'json'
+        ? JSON.stringify(data, null, 2)
+        : buildMarkdownReport(data);
+      reportStatus.textContent = `Отчет обновлен: ${data.questions.length} вопросов, ${data.elapsed}.`;
+    }
+
+    async function copyReportText() {
+      if (!reportOutput.value) updateReport();
+      if (!reportOutput.value) return;
+
+      try {
+        await navigator.clipboard.writeText(reportOutput.value);
+        reportStatus.textContent = 'Отчет скопирован.';
+      } catch {
+        reportOutput.focus();
+        reportOutput.select();
+        document.execCommand('copy');
+        reportStatus.textContent = 'Отчет выделен и скопирован через fallback.';
+      }
+    }
+
+    function downloadReportText() {
+      if (!reportOutput.value) updateReport();
+      if (!reportOutput.value) return;
+
+      const extension = reportFormat.value === 'json' ? 'json' : 'md';
+      const mime = reportFormat.value === 'json' ? 'application/json' : 'text/markdown';
+      const blob = new Blob([reportOutput.value], { type: `${mime};charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `java-interview-report-${new Date().toISOString().slice(0, 10)}.${extension}`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      reportStatus.textContent = 'Отчет скачан.';
+    }
+
+    function startNewInterview() {
+      if (!questionBank.length) {
+        bankStatus.textContent = 'Банк вопросов не загружен.';
+        return;
+      }
+
+      if (session && !confirm('Начать новую сессию и заменить текущие ответы?')) {
+        return;
+      }
+
+      session = createSession(Number(sessionSize.value));
+      currentIndex = 0;
+      reportOutput.value = '';
+      reportStatus.textContent = '';
+      saveSession();
+      renderSession();
+      userAnswer.focus();
+    }
+
+    function resetCurrentSession() {
+      if (!session && !localStorage.getItem(storageKey)) return;
+      if (!confirm('Удалить текущую сессию интервью?')) return;
+      session = null;
+      currentIndex = 0;
+      localStorage.removeItem(storageKey);
+      reportOutput.value = '';
+      reportStatus.textContent = '';
+      if (timerId) window.clearInterval(timerId);
+      renderSession();
+      bankStatus.textContent = 'Сессия сброшена.';
+    }
+
+    startInterview.addEventListener('click', startNewInterview);
+    resetSession.addEventListener('click', resetCurrentSession);
+
+    userAnswer.addEventListener('input', () => {
+      if (!session) return;
+      session.questions[currentIndex].userAnswer = userAnswer.value;
+      answerCount.textContent = `${userAnswer.value.length} символов`;
+      saveSession();
+      renderStats();
+      renderRail();
+    });
+
+    confidenceButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!session) return;
+        const item = session.questions[currentIndex];
+        item.confidence = item.confidence === button.dataset.confidence ? '' : button.dataset.confidence;
+        saveSession();
+        renderQuestion();
+      });
+    });
+
+    toggleReference.addEventListener('click', () => {
+      if (!session) return;
+      const item = session.questions[currentIndex];
+      item.referenceVisible = !item.referenceVisible;
+      saveSession();
+      renderQuestion();
+    });
+
+    prevQuestion.addEventListener('click', () => {
+      if (!session || currentIndex === 0) return;
+      currentIndex -= 1;
+      saveSession();
+      renderQuestion();
+      userAnswer.focus();
+    });
+
+    nextQuestion.addEventListener('click', () => {
+      if (!session || currentIndex >= session.questions.length - 1) return;
+      currentIndex += 1;
+      saveSession();
+      renderQuestion();
+      userAnswer.focus();
+    });
+
+    questionRail.addEventListener('click', (event) => {
+      const button = event.target.closest('.rail-button');
+      if (!button || !session) return;
+      currentIndex = Number(button.dataset.index);
+      saveSession();
+      renderQuestion();
+      userAnswer.focus();
+    });
+
+    finishInterview.addEventListener('click', () => {
+      updateReport();
+      reportOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    buildReport.addEventListener('click', updateReport);
+    reportFormat.addEventListener('change', updateReport);
+    copyReport.addEventListener('click', copyReportText);
+    downloadReport.addEventListener('click', downloadReportText);
+
+    renderWeights();
+
+    const savedSession = loadSession();
+    if (savedSession) {
+      session = savedSession;
+      currentIndex = Math.min(Number(savedSession.currentIndex || 0), savedSession.questions.length - 1);
+      bankStatus.textContent = `Восстановлена сессия: ${savedSession.questions.length} вопросов.`;
+      renderSession();
+    } else {
+      const pdfCount = new Set(questionBank.filter((item) => item.sourceType === 'pdf').map((item) => item.sourceId)).size;
+      const algorithmCount = questionBank.filter((item) => item.sourceType === 'algorithm').length;
+      bankStatus.textContent = `Банк готов: ${pdfCount} PDF-вопросов и ${algorithmCount} алгоритмических задач.`;
+    }
+  </script>
+</body>
+</html>
